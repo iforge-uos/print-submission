@@ -42,4 +42,4 @@ class The_Bar(QDialog):
 
         self.setLayout(vBox)
     def update(self,val):
-        self.progress.setValue(val)
+        self.progress.setValue(int(val))
