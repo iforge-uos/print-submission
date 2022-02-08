@@ -8,42 +8,44 @@ from datetime import datetime
 import json
 import hashbrowns
 
-with hashbrowns.Hashbrown(password=sys.argv[0], build_mode=True) as hashbrown:
+if __name__ == "__main__":
 
-    data = hashbrown.decrypted_data
+    with hashbrowns.Hashbrown(password=sys.argv[1], build_mode=True) as hashbrown:
 
-    # Increment build version
-    version_string = datetime.now().strftime('%y%m%d')
-    data["Version"] = int(version_string)
+        data = hashbrown.decrypted_data
 
-    my_date = datetime.now()
-    string = 'Print Queue Program V.'+my_date.strftime('%y%m%d')
+        # Increment build version
+        version_string = datetime.now().strftime('%y%m%d')
+        data["Version"] = int(version_string)
 
-    PyInstaller.__main__.run([
-        '--clean',
-        '--name=%s' % string,
-        '--onefile',
-        '--windowed',
-        '--add-data=iForge_logo_no_background_small.png;.',
-        '--add-data=print_submission.py;.',
-        '--add-data=secrets.json;.',
-        '--add-data=file_dialog.py;.',
-        '--add-data=gcode_parse.py;.',
-        '--add-data=gdrive_upload.py;.',
-        '--add-data=iForge_logo_no_background_small.png;.',
-        '--add-data=printq50.png;.',
-        '--add-data=printq50icon.ico;.',
-        '--add-data=serviceaccount.json;.',
-        '--add-data=progress_bar.py;.',
-        '--icon=%s' % os.path.join('resources/printq50icon.ico'),
-        os.path.join('main.py'),
-    ])
+        my_date = datetime.now()
+        string = 'Print Queue Program V.'+my_date.strftime('%y%m%d')
 
-    print("\n\nBuild complete\n")
+        PyInstaller.__main__.run([
+            '--clean',
+            '--name=%s' % string,
+            '--onefile',
+            '--windowed',
+            '--add-data=iForge_logo_no_background_small.png;.',
+            '--add-data=print_submission.py;.',
+            '--add-data=secrets.json;.',
+            '--add-data=file_dialog.py;.',
+            '--add-data=gcode_parse.py;.',
+            '--add-data=gdrive_upload.py;.',
+            '--add-data=iForge_logo_no_background_small.png;.',
+            '--add-data=printq50.png;.',
+            '--add-data=printq50icon.ico;.',
+            '--add-data=serviceaccount.json;.',
+            '--add-data=progress_bar.py;.',
+            '--icon=%s' % os.path.join('resources/printq50icon.ico'),
+            os.path.join('main.py'),
+        ])
 
-    os.remove(string+".spec")
+        print("\n\nBuild complete\n")
 
-    shutil.rmtree("build")
-    shutil.rmtree("__pycache__")
+        os.remove(string+".spec")
 
-    print("Build files deleted\n")
+        shutil.rmtree("build")
+        shutil.rmtree("__pycache__")
+
+        print("Build files deleted\n")
