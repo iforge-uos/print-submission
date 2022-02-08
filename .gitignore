@@ -6,5 +6,6 @@ venv/*
 secrets.json
 
 build/
+dist/
 
 *.spec
