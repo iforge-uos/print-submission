@@ -1,6 +1,6 @@
 # from cryptography.fernet import Fernet
 import time
-from os import path
+import get_path
 import json
 
 import base64
@@ -15,18 +15,18 @@ import PySimpleGUI as psg
 class Hashbrown:
     def __enter__(self):
         if self.build_mode:
-            with open("secrets.json", "w") as file:
+            with open(get_path.go("secrets.json"), "w") as file:
                 json.dump(self.decrypted_data, file)
                 # file.write(self.decrypted_data)
-            with open("serviceaccount.json", "w") as file:
+            with open(get_path.go("serviceaccount.json"), "w") as file:
                 json.dump(self.decrypted_data["jason"], file)
 
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.build_mode:
-            os.remove("secrets.json")
-            os.remove("serviceaccount.json")
+            os.remove(get_path.go("secrets.json"))
+            os.remove(get_path.go("serviceaccount.json"))
 
     def __init__(self, password=None, build_mode=False):
         self.build_mode = build_mode
@@ -67,17 +67,17 @@ class Hashbrown:
         self.cryptor = Fernet(self.key)
 
     def load_encrypted(self):
-        with open("resources/secrets.json.enc", "rb") as encrypted_file:
+        with open(get_path.go("resources/secrets.json.enc"), "rb") as encrypted_file:
             data = encrypted_file.read()
         return data
 
     def write_encrypted(self):
-        with open("resources/secrets.json.enc", "wb") as encrypted_file:
+        with open(get_path.go("resources/secrets.json.enc"), "wb") as encrypted_file:
             encrypted_file.write(self.encrypted_data)
 
     def encrypt(self, data=None):
         if not data:
-            with open("secrets.json", "rb") as decrypted_file:
+            with open(get_path.go("secrets.json"), "rb") as decrypted_file:
                 data = decrypted_file.read()
                 try:
                     json.loads(data.decode("ascii"))
