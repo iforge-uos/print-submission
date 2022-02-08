@@ -98,6 +98,7 @@ def run(fileName, short):
     if not (parameters["printer_type"] and parameters["time_taken"] and len(parameters["filament_used"]) == 3):
         print("Malformed Gcode, please reslice. parameters:")
         print(parameters)
+        parameters["printer_type"] = "non_iforge"
         error = True
 
     return parameters, error

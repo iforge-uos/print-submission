@@ -562,6 +562,11 @@ class Print_queue_app(QWidget):
                 self.status_label.setStyleSheet('color:red')
                 self.status_label.setText("Prusa control may not be set up correctly.\n\nPlease reslice!")
                 self.submit_button.setDisabled(True)
+            elif details["printer_type"] == "non_iforge":
+                self.gcode_label.setText(self.short_GCODE)
+                self.status_label.setStyleSheet('color:red')
+                self.status_label.setText("Sliced using non-iForge settings, please reslice using our presets")
+                self.submit_button.setDisabled(True)
             else:
                 self.gcode_label.setText(self.short_GCODE)
                 self.status_label.setText(

@@ -43,18 +43,18 @@ class Hashbrown:
             pass
         else:
             # no password supplied
-            password = psg.PopupGetText("Enter password", password_char="*", title="Password").encode("ascii")
-            # password = input("enter password: ").encode("ascii")
+            password = psg.PopupGetText("Enter password", password_char="*", title="Password")
+            # password = input("enter password: ")
 
         loop_lock = True
         while loop_lock:
             try:
-                self.generate_cryptor(password)
+                self.generate_cryptor(password.encode("ascii"))
                 self.decrypt()
                 loop_lock = False
             except cryptography.fernet.InvalidToken:
                 print("Incorrect password, try again")
-                password = psg.PopupGetText("Enter password", password_char="*", title="Password").encode("ascii")
+                password = psg.PopupGetText("Enter password", password_char="*", title="Password")
 
     def generate_cryptor(self, password):
         self.kdf = PBKDF2HMAC(
@@ -128,7 +128,7 @@ class Hashbrown:
                 password2 = psg.PopupGetText("Confirm new password", password_char="*", title="Password")
                 if password1 == password2:
                     print("Passwords match, ", end="")
-                    password = password1.encode("ascii")
+                    password = password1
                     loop_lock = False
                 else:
                     print("Passwords don't match, try again")
@@ -141,7 +141,7 @@ class Hashbrown:
             salt=self.salt,
             iterations=400000,
         )
-        self.key = base64.urlsafe_b64encode(self.kdf.derive(password))
+        self.key = base64.urlsafe_b64encode(self.kdf.derive(password.encode("ascii")))
         self.cryptor = Fernet(self.key)
 
         self.encrypted_data = self.encrypt(self.decrypted_data)
@@ -150,9 +150,9 @@ class Hashbrown:
 
 """ To update the secrets, run this: """
 if __name__ == "__main__":
-    with Hashbrown(build_mode=True) as hashbrown:
+    with Hashbrown(password="force", build_mode=True) as hashbrown:
         """ Contents editing: """
-        hashbrown.edit_contents()
+        # hashbrown.edit_contents()
 
         """ Password changing: """
         # hashbrown.change_password()
