@@ -61,7 +61,7 @@ class App(QWidget):
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Information)
 
-                msg.setText("This is a big file, it may take a bit of time to process,.\nThe program isn't crashing.")
+                msg.setText("This is a big file, it may take a bit of time to process.")
                 msg.setWindowTitle("Just a heads up")
                 msg.setStandardButtons(QMessageBox.Ok)
                 retval = msg.exec_()
