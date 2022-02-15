@@ -785,15 +785,13 @@ class Print_queue_app(QWidget):
                 break
             if text == "maker5pace":
                 # Ah yes lets store the password as plain text, solid idea....
-                msg = QMessageBox()
-                msg.setIcon(QMessageBox.Information)
-                msg.setText("Just give the program some time to do its thing. \nYoull know when its done")
-                msg.setWindowTitle("Just a heads up")
-                msg.setWindowIcon(QIcon(self.littlelogopath))
-                msg.setStandardButtons(QMessageBox.Ok)
-                retval = msg.exec_()
-                # thread2 = threading.Thread(target=self.submit_file())
-                # thread2.start
+                # msg = QMessageBox()
+                # msg.setIcon(QMessageBox.Information)
+                # msg.setText("Just give the program some time to do its thing. \nYoull know when its done")
+                # msg.setWindowTitle("Just a heads up")
+                # msg.setWindowIcon(QIcon(self.littlelogopath))
+                # msg.setStandardButtons(QMessageBox.Ok)
+                # retval = msg.exec_()
 
                 return "TRUE"
             else:
