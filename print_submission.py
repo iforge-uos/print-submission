@@ -892,9 +892,9 @@ class Print_queue_app(QWidget):
 
             sheet.update_cell(rows, '15', id_GCODE)
 
-            formula1 = "=TO_TEXT(P" + str_rows + "+D" + str_rows + ")"
+            formula1 = f'=IFERROR(if(P{str_rows}<>"", (D{str_rows}+P{str_rows}),""),"")'
             formula2 = "=IFERROR(if(I" + str_rows + '="complete", (NOW()-G' + str_rows + '),""),"")'
-            formula3 = "=AVERAGE(R" + str(int(rows) - 20) + ":R" + str_rows + ")"
+            # formula3 = "=AVERAGE(R" + str(int(rows) - 20) + ":R" + str_rows + ")"
             formula4 = '=COUNTIFS(K$4:K,K' + str_rows + ',I$4:I,"Running")'
             sheet.update_cell(rows, '17', formula1)
             sheet.update_cell(rows, '18', formula2)
