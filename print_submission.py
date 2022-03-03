@@ -661,7 +661,7 @@ class Print_queue_app(QWidget):
         try:
             sheet = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("Print Log")
             latest = int(sheet.acell("S2").value)
-            if latest > version:
+            if latest >= version:
                 print("oh dear ")
                 self.error_handling(2)
                 sys.exit(1)

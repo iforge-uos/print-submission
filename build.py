@@ -18,7 +18,8 @@ if __name__ == "__main__":
         version_string = datetime.now().strftime('%y%m%d')
         data["Version"] = int(version_string)
 
-        hashbrown.encrypt(data)
+        hashbrown.encrypted_data = hashbrown.encrypt(data)
+        hashbrown.write_encrypted()
 
     with hashbrowns.Hashbrown(password=sys.argv[1], build_mode=True) as hashbrown:
 
