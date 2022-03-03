@@ -37,8 +37,11 @@ if __name__ == '__main__':
     # with open(get_path.go("secrets.json")) as file:
     #     Config = json.load(file)
 
-    cwd = os.getcwd()
-    py_cwd = cwd.lower().replace(" ", "_")
+    if len(sys.argv) > 1:
+        py_cwd = sys.argv[1]
+    else:
+        cwd = os.getcwd()
+        py_cwd = cwd.lower().replace(" ", "_")
 
     with hashbrowns.Hashbrown(py_cwd) as hashbrown:
         Config = hashbrown.decrypted_data
