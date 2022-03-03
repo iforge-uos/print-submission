@@ -10,13 +10,17 @@ import hashbrowns
 
 if __name__ == "__main__":
 
-    with hashbrowns.Hashbrown(password=sys.argv[1], build_mode=True) as hashbrown:
+    with hashbrowns.Hashbrown(password=sys.argv[1], build_mode=False) as hashbrown:
 
         data = hashbrown.decrypted_data
 
         # Increment build version
         version_string = datetime.now().strftime('%y%m%d')
         data["Version"] = int(version_string)
+
+        hashbrown.encrypt(data)
+
+    with hashbrowns.Hashbrown(password=sys.argv[1], build_mode=True) as hashbrown:
 
         my_date = datetime.now()
         string = 'Print Queue Program V.'+my_date.strftime('%y%m%d')
