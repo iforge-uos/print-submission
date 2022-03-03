@@ -534,7 +534,7 @@ class Print_queue_app(QWidget):
         print(self.Config["details"])
         print(self.Config["length"])
         details = self.Config["details"]
-        printer_oops = "Unsupported printer"
+        printer_oops = "non_iforge"
         if details == None:
             print("no file")
         else:
@@ -555,7 +555,7 @@ class Print_queue_app(QWidget):
             if details["printer_type"] == printer_oops:
                 self.gcode_label.setText(self.short_GCODE)
                 self.status_label.setStyleSheet('color:red')
-                self.status_label.setText(printer_oops + ". Maybe get a rep to check the gcode again.")
+                self.status_label.setText( "Unsupported printer or profile. \nMaybe get a rep to check the gcode again.")
                 self.submit_button.setDisabled(True)
             elif details["printer_type"] == "Prusa MK2":
                 self.gcode_label.setText(self.short_GCODE)

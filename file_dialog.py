@@ -69,7 +69,7 @@ class App(QWidget):
             self.Config["length"] = details["filament_used"]["mm"]
             print("File selected")
 
-        if fileName == "" or error:
+        if fileName == "":
             # global weight
             length = 0
             print("no details")
