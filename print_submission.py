@@ -22,6 +22,7 @@ import traceback
 import time
 import LDAP
 import PyQt5.QtWidgets
+import pandas as pd
 
 QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True) #enable highdpi scaling
 QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True) #use highdpi icons
@@ -75,6 +76,24 @@ class Print_queue_app(QWidget):
 
     def setConfig(self, cfg):
         self.Config = cfg
+
+    def update_rep_names(self, force_reauth=False):
+        if force_reauth:
+            self.reAuth()
+
+        UserBase = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("User Database")
+        users = pd.DataFrame(UserBase.get_all_records(head=1))
+        reps = users[users["rep_auth"] == 1]
+
+        # generate rep name list, fallback on long name if no short provided
+        rep_list = []
+        for long, short in zip(reps["Name"], reps["short_name"]):
+            if not short:
+                rep_list.append(long)
+            else:
+                rep_list.append(short)
+
+        self.Config["Rep_names"] = rep_list
 
     def startEverything(self):
         self.scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive',
@@ -206,14 +225,17 @@ class Print_queue_app(QWidget):
         self.project_box.setPlaceholderText("Eg: Personal, FYP, MEC115")
         self.login_box.setPlaceholderText("Eg: FE6IF")
 
+        self.update_rep_names()
+
         # This function checks if text has been changed in a field and colours
-        # the box if the text cahnge matches a criteria. Also serves to auto
+        # the box if the text change matches a criteria. Also serves to auto
         # capitalise names of reps
         def reptextchanged(text):
             if len(self.rep_box.text()) > 0 and len(self.rep_box.text()) < 2:
                 # cap = string.capwords(self.rep_box.text())
                 nocap = self.rep_box.text()
                 self.rep_box.setText(nocap)
+                self.update_rep_names()
             if (self.rep_box.text() not in self.Config["Rep_names"]) and len(self.rep_box.text()) > 0:
                 self.rep_box.setStyleSheet("background-color: rgb(255, 0, 0,50);")
             elif (self.rep_box.text() in self.Config["Rep_names"]):
@@ -728,6 +750,8 @@ class Print_queue_app(QWidget):
         self.submit_button.setDisabled(True)
         self.status_label.setStyleSheet('color:default')
         self.submit_button.setText("Submit")
+
+        self.update_rep_names(True)
 
     # This is the competency check. We check for full name, we check an email has
     # a "." or number present, we check the rep name is a registered rep and we
