@@ -925,7 +925,8 @@ class Print_queue_app(QWidget):
             sheet.update_cell(rows, '19', formula4)
             sheet.update_cell(rows, '9', finalstatus)
 
-
+            log_sheet = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("Print Log")
+            eta = log_sheet.acell("S1").value.split('\n')[1]
 
             self.clearall()
             self.clearUI()
@@ -940,7 +941,7 @@ class Print_queue_app(QWidget):
             self.raise_()
             self.show()
             self.status_label.setText(
-                "Uploaded " + self.short_GCODE + " at " + time + ", you are number " + queue + " in the queue.\nThere are " + queuemore + " now!")
+                "Uploaded " + self.short_GCODE + " at " + time + ", you are number " + queue + " in the queue.\n Our best time estimate is:\n" + eta)
 
             self.path_GCODE = ""
             self.short_GCODE = ""
