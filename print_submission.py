@@ -897,6 +897,15 @@ class Print_queue_app(QWidget):
                     details["rep_check"] = self.rep_box.text()  # NOCAPS
                 else:
                     details["rep_check"] = "Unchecked"
+
+                if not re.findall("https://drive.google.com/file/d/", details["rep_check"]):
+                    leaderboard_sheet = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("Leaderboard")
+                    lb = pd.DataFrame(leaderboard_sheet.get_all_records(head=2))[
+                        ["Fail & Reject rate", "Names"]].set_index("Names")
+                    err_perc = float(lb.loc[details["rep_check"], "Fail & Reject rate"].strip("%")) / 100.0
+                    if err_perc >= 0.20:
+                        finalstatus = "Under review"
+
             rows = sheet.row_count
             print(rows)
             str_rows = str(rows)
