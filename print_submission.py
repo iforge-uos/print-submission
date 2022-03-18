@@ -24,8 +24,9 @@ import LDAP
 import PyQt5.QtWidgets
 import pandas as pd
 
-QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True) #enable highdpi scaling
-QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True) #use highdpi icons
+QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)  # enable highdpi scaling
+QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)  # use highdpi icons
+
 
 # class test(QLabel):
 #     clicked = pyqtSignal(str)
@@ -121,8 +122,8 @@ class Print_queue_app(QWidget):
 
         self.left = 820
         self.top = 240
-        #Swidth = int(size.width() / 5.19)  # Dynamic display scaling, who even uses 1440p
-        #Sheight = int(size.height() / 1.48)
+        # Swidth = int(size.width() / 5.19)  # Dynamic display scaling, who even uses 1440p
+        # Sheight = int(size.height() / 1.48)
         self.width = 370
         self.height = 730
         self.setMaximumWidth(370)
@@ -578,7 +579,7 @@ class Print_queue_app(QWidget):
             if details["printer_type"] == printer_oops:
                 self.gcode_label.setText(self.short_GCODE)
                 self.status_label.setStyleSheet('color:red')
-                self.status_label.setText( "Unsupported printer or profile. \nMaybe get a rep to check the gcode again.")
+                self.status_label.setText("Unsupported printer or profile. \nMaybe get a rep to check the gcode again.")
                 self.submit_button.setDisabled(True)
             elif details["printer_type"] == "Prusa MK2":
                 self.gcode_label.setText(self.short_GCODE)
@@ -596,7 +597,7 @@ class Print_queue_app(QWidget):
                     f'Printer: {details["printer_type"]}\n'
                     f'Estimated time: {details["time_taken"]}\n'
                     f'Filament used: {details["filament_used"]["g"]:.3f}g\n'
-                    f'Length: {details["filament_used"]["mm"]/1000:.3f}m')
+                    f'Length: {details["filament_used"]["mm"] / 1000:.3f}m')
                 # self.submit_button.setDisabled(False)
                 weight = f"{details['filament_used']['g']}g"
                 print("570")
@@ -887,6 +888,7 @@ class Print_queue_app(QWidget):
                 details["rep_check"] = hyperlink_irepcheck
             else:
                 sheet = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("Queue")
+
                 # Stops us doing a manual check
                 if hours >= 10:
                     finalstatus = "Under review"
@@ -894,7 +896,7 @@ class Print_queue_app(QWidget):
                     finalstatus = "Queued"
                 if level == "Beginner":
                     # details["rep_check"]=string.capwords(self.rep_box.text()) #CAPS
-                    details["rep_check"] = self.rep_box.text()  # NOCAPS
+                    details["rep_check"] = self.rep_box.text()
                 else:
                     details["rep_check"] = "Unchecked"
 
@@ -909,7 +911,7 @@ class Print_queue_app(QWidget):
             rows = sheet.row_count
             print(rows)
             str_rows = str(rows)
-            row_items = [] #  list(details.values())
+            row_items = []  # list(details.values())
             for x in details["order"]:
                 if x == "filament_used":
                     row_items.append(details[x]["g"])
@@ -934,8 +936,6 @@ class Print_queue_app(QWidget):
             sheet.update_cell(rows, '18', formula2)
             sheet.update_cell(rows, '19', formula4)
             sheet.update_cell(rows, '9', finalstatus)
-
-
 
             self.clearall()
             self.clearUI()
