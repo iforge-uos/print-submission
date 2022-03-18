@@ -111,6 +111,8 @@ class Print_queue_app(QWidget):
         self.biglogopath = get_path.go('resources/iForge_logo_no_background_small.png')
         self.littlelogopath = get_path.go('resources/printq50.png')
 
+        self.version_check()
+
         self.setWindowTitle("The Print Queue")
         self.setWindowIcon(QIcon(self.littlelogopath))
 
@@ -466,7 +468,6 @@ class Print_queue_app(QWidget):
 
         self.togglebox_0.addWidget(self.groupBox0)
         self.togglebox_2.addWidget(self.groupBox2)
-        self.version_check()
 
     def credit_check(self):
         self.reAuth()
@@ -683,7 +684,7 @@ class Print_queue_app(QWidget):
         try:
             sheet = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("Print Log")
             latest = int(sheet.acell("S2").value)
-            if latest >= version:
+            if latest > version:
                 print("oh dear ")
                 self.error_handling(2)
                 sys.exit(1)
