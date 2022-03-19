@@ -41,7 +41,8 @@ if __name__ == '__main__':
         py_cwd = sys.argv[1]
     else:
         cwd = os.getcwd()
-        py_cwd = cwd.lower().replace(" ", "_")
+
+    py_cwd = cwd.lower().replace(" ", "_")
 
     with hashbrowns.Hashbrown(py_cwd) as hashbrown:
         Config = hashbrown.decrypted_data

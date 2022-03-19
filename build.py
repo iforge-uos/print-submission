@@ -9,7 +9,7 @@ import json
 import hashbrowns
 
 if __name__ == "__main__":
-
+    sys.argv[1] = sys.argv[1].lower().replace(" ", "_")
     with hashbrowns.Hashbrown(password=sys.argv[1], build_mode=False) as hashbrown:
 
         data = hashbrown.decrypted_data
