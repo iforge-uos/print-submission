@@ -894,19 +894,27 @@ class Print_queue_app(QWidget):
                     finalstatus = "Under review"
                 else:
                     finalstatus = "Queued"
+
                 if level == "Beginner":
                     # details["rep_check"]=string.capwords(self.rep_box.text()) #CAPS
                     details["rep_check"] = self.rep_box.text()
                 else:
                     details["rep_check"] = "Unchecked"
 
-                # if not re.findall("https://drive.google.com/file/d/", details["rep_check"]):
-                #     leaderboard_sheet = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("Leaderboard")
-                #     lb = pd.DataFrame(leaderboard_sheet.get_all_records(head=2))[
-                #         ["Fail & Reject rate", "Names"]].set_index("Names")
-                #     err_perc = float(lb.loc[details["rep_check"], "Fail & Reject rate"].strip("%")) / 100.0
-                #     if err_perc >= 0.20:
-                #         finalstatus = "Under review"
+                if not re.findall("https://drive.google.com/file/d/", details["rep_check"]):
+                    leaderboard_sheet = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("Leaderboard")
+                    lb = pd.DataFrame(leaderboard_sheet.get_all_records(head=2))[
+                        ["Fail & Reject rate", "Names"]].set_index("Names")
+                    try:
+                        err_perc = float(lb.loc[details["rep_check"], "Fail & Reject rate"].strip("%")) / 100.0
+                        # if rep has a lot of failed/rejected prints
+                        if err_perc >= 0.20:
+                            finalstatus = "Under review"
+                    except KeyError as e:
+                        print(e)
+                        # rep not in leaderboard, ie first print
+                        finalstatus = "Under review"
+
 
             rows = sheet.row_count
             print(rows)
@@ -952,6 +960,9 @@ class Print_queue_app(QWidget):
             self.activateWindow()
             self.raise_()
             self.show()
+            useful_string = "Uploaded " + self.short_GCODE + " at " + time + ", you are number " + queue + " in the queue."
+            eta_string = "\n Our best time estimate is:\n" + eta
+            self.status_label.setText(useful_string)
 
             useful_string = "Uploaded " + self.short_GCODE + " at " + time + ", you are number " + queue + " in the queue."
             eta_string = "\n Our best time estimate is:\n" + eta
@@ -967,7 +978,7 @@ class Print_queue_app(QWidget):
             keep = self.failedmessage()
             if keep == 0:
                 self.clearall()
-            sheet.delete_row(rows)
+            sheet.delete_row(rows)  # TODO: fix references to `sheet` when not declared, needs refactoring _a lot_ to `self.sheet` (same for `rows`)
             return
 
     def sheet(self):

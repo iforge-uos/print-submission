@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
     cwd = os.getcwd() #Bodge fix cos theres no documentation of whats going on here
     if len(sys.argv) > 1:
-        py_cwd = sys.argv[1]
+        cwd = sys.argv[1]
     else:
         cwd = os.getcwd()
 
