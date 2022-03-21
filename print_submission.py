@@ -900,13 +900,13 @@ class Print_queue_app(QWidget):
                 else:
                     details["rep_check"] = "Unchecked"
 
-                if not re.findall("https://drive.google.com/file/d/", details["rep_check"]):
-                    leaderboard_sheet = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("Leaderboard")
-                    lb = pd.DataFrame(leaderboard_sheet.get_all_records(head=2))[
-                        ["Fail & Reject rate", "Names"]].set_index("Names")
-                    err_perc = float(lb.loc[details["rep_check"], "Fail & Reject rate"].strip("%")) / 100.0
-                    if err_perc >= 0.20:
-                        finalstatus = "Under review"
+                # if not re.findall("https://drive.google.com/file/d/", details["rep_check"]):
+                #     leaderboard_sheet = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("Leaderboard")
+                #     lb = pd.DataFrame(leaderboard_sheet.get_all_records(head=2))[
+                #         ["Fail & Reject rate", "Names"]].set_index("Names")
+                #     err_perc = float(lb.loc[details["rep_check"], "Fail & Reject rate"].strip("%")) / 100.0
+                #     if err_perc >= 0.20:
+                #         finalstatus = "Under review"
 
             rows = sheet.row_count
             print(rows)
@@ -952,8 +952,11 @@ class Print_queue_app(QWidget):
             self.activateWindow()
             self.raise_()
             self.show()
-            self.status_label.setText(
-                "Uploaded " + self.short_GCODE + " at " + time + ", you are number " + queue + " in the queue.\n Our best time estimate is:\n" + eta)
+
+            useful_string = "Uploaded " + self.short_GCODE + " at " + time + ", you are number " + queue + " in the queue."
+            eta_string = "\n Our best time estimate is:\n" + eta
+            status_string = useful_string
+            self.status_label.setText(status_string)
 
             self.path_GCODE = ""
             self.short_GCODE = ""

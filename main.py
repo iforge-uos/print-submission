@@ -37,6 +37,7 @@ if __name__ == '__main__':
     # with open(get_path.go("secrets.json")) as file:
     #     Config = json.load(file)
 
+    cwd = os.getcwd() #Bodge fix cos theres no documentation of whats going on here
     if len(sys.argv) > 1:
         py_cwd = sys.argv[1]
     else:
