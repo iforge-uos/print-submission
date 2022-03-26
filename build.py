@@ -24,9 +24,9 @@ if __name__ == "__main__":
     with hashbrowns.Hashbrown(password=sys.argv[1], build_mode=True) as hashbrown:
 
         my_date = datetime.now()
-        if sys.argv[2]:
+        try:
             string = sys.argv[2]  # output filename
-        else:
+        except:
             string = 'Print Queue Program V.'+my_date.strftime('%y%m%d')
 
         PyInstaller.__main__.run([

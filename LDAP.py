@@ -46,7 +46,8 @@ def Lookup(source):
         Type = "uid"
         searchterm = source
 
-    o = re.match("\S+@sheffield.ac.uk", source)
+    o = re.match("\S+@sheffield.ac.uk", source, re.IGNORECASE)
+    # o = re.match("\S+@sheffield.ac.uk", source)
     if o:
         source = source.split('@')[0]
     n = re.match("([a-zA-Z]+[0-9]$)", source)
@@ -58,13 +59,21 @@ def Lookup(source):
     try:
         # conn.search('dc=sheffield,dc=ac,dc=uk', '(&(objectclass=person)(mail=%s))'%(Email), attributes=['givenName','sn'])
         conn.search('dc=sheffield,dc=ac,dc=uk', '(&(objectclass=person)(%s=%s))' % (Type, searchterm),
-                    attributes=['givenName', 'sn', 'mail'])
+                    attributes=['givenName', 'sn', 'mail','uid'])
         result = conn.entries[0]
         LDAP_data[0] = str(result.givenName) + " " + str(result.sn)
         LDAP_data[1] = str(result.mail)
+
         if LDAP_data[1] == '[]':
             raise
+        if Type !="uid":
+            print("\nLDAP LOOKUP SUBROUTINE")
+            print("UID:"+str(result.uid))
+            print("Name:"+str(result.givenName) + " " + str(result.sn))
+            print("Email:" + str(result.mail)+"\n")
+            raise
         LDAP_data[2] = "Complete"
+
         return (LDAP_data)
     except Exception as e:
         print("The details you have entered dont seem to be valid")
