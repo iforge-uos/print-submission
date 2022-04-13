@@ -4,6 +4,7 @@ from progress_bar import The_Bar
 from oauth2client.service_account import ServiceAccountCredentials
 from googleapiclient.discovery import build, MediaFileUpload
 import os
+from tqdm import tqdm
 
 
 def run(fileName,short, window, Config):
@@ -28,21 +29,30 @@ def run(fileName,short, window, Config):
         # 'mimeType': 'text/plain', #Fairly sure this isnt needed
         "parents": [Config["FolderID"]]
             }
+    pbar = tqdm(total=100)
     window.ProgressBar = The_Bar()
     window.ProgressBar.setConfig(Config)
     window.ProgressBar.initUi()
     window.ProgressBar.show()
     request = DRIVE.files().create(supportsTeamDrives=True,body=body, media_body=media_body)
     response = None
-
+    lastvalue = 0
     while response is None:
         Config["app"].processEvents()
         status, response = request.next_chunk()
         if status:
             percent=status.progress() * 100
-            print ("Uploaded %.2f%%" % (percent))
+            pbar.n = percent
+            pbar.refresh()
+
+            # delta = percent - lastvalue
+            # pbar.update(delta)
+            # lastvalue = percent
+            # print ("Uploaded %.2f%%" % (percent))
             window.ProgressBar.update(percent)
             Config["app"].processEvents()
+    pbar.n = 100
+    pbar.refresh()
     print("file uploaded")
     window.ProgressBar.update(100)
 

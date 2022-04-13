@@ -64,10 +64,7 @@ QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)  # use highdpi i
 class Validator(QtGui.QValidator):
     def validate(self, string, pos):
         return QtGui.QValidator.Acceptable, string.upper(), pos
-        # DRG: seems to set input text to upper in rep name input box
-        # for old code still using QString, use this instead
-        # string.replace(0, string.count(), string.toUpper())
-        # return QtGui.QValidator.Acceptable, pos
+        #Used later to ensure new text entered is upper case and displayed as such
 
 
 class Print_queue_app(QWidget):
@@ -129,11 +126,6 @@ class Print_queue_app(QWidget):
         self.setMaximumWidth(370)
 
         self.setFixedSize(370, 730)
-
-        # self.setWindowFlags(self.windowFlags()
-        #                                  | QtCore.Qt.MSWindowsFixedSizeDialogHint
-        #                                 )
-
         self.setGeometry(self.left, self.top, self.width, self.height)
 
         # Set up iForge imgae as a pixmap
@@ -238,7 +230,7 @@ class Print_queue_app(QWidget):
                 # cap = string.capwords(self.rep_box.text())
                 nocap = self.rep_box.text()
                 self.rep_box.setText(nocap)
-                self.update_rep_names()
+                # self.update_rep_names()
             if (self.rep_box.text() not in self.Config["Rep_names"]) and len(self.rep_box.text()) > 0:
                 self.rep_box.setStyleSheet("background-color: rgb(255, 0, 0,50);")
             elif (self.rep_box.text() in self.Config["Rep_names"]):
@@ -253,7 +245,10 @@ class Print_queue_app(QWidget):
             self.score_label.setText("Searching")
             self.timer = QTimer()
             self.timer.setInterval(600)
-            self.timer.timeout.connect(self.credit_check)
+            if re.match("[a-zA-Z]+[0-9]+[a-zA-Z]+", self.login_box.text()):
+                self.timer.timeout.connect(self.credit_check)
+            else:
+                self.score_label.setText("")
             self.timer.start()
 
         # Connect the text changed event to the function above
@@ -273,7 +268,6 @@ class Print_queue_app(QWidget):
             def fill():
                 if self.login_box.text() in self.Config["RecentName"]:
                     ind = self.Config["RecentName"].index(self.login_box.text())
-                    print(ind)
                     self.project_box.setText(self.Config["RecentProject"][ind])
 
             self.login_box.textEdited.connect(fill)
@@ -449,6 +443,7 @@ class Print_queue_app(QWidget):
         hBoxBrowse.addWidget(self.sheet_button)
         hBoxBrowse.addWidget(self.drive_button)
 
+        self.logo.setAlignment(QtCore.Qt.AlignCenter)
         self.vBox = QVBoxLayout()
         self.vBox.addWidget(self.logo)
         self.vBox.addLayout(hBoxBlank3)
@@ -478,18 +473,22 @@ class Print_queue_app(QWidget):
                 print("BLANK NAME")
                 raise
             UserBase = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("User Database")
-            cell = UserBase.find(self.login_box.text())
 
-            name_cell = "B" + str(cell.row)
-            email_cell = "C" + str(cell.row)
-            score_cell = "D" + str(cell.row)
-            level_cell = "E" + str(cell.row)
+            login,name,email,score,level = UserBase.row_values(UserBase.find(self.login_box.text()).row)[0:5]
 
-            login = str(self.login_box.text())
-            name = str(UserBase.acell(name_cell).value)
-            email = str(UserBase.acell(email_cell).value)
-            score = str(UserBase.acell(score_cell).value)
-            level = str(UserBase.acell(level_cell).value)
+            # cell = UserBase.find(self.login_box.text()) #Struggle
+
+            # name_cell = "B" + str(cell.row)
+            # email_cell = "C" + str(cell.row)
+            # score_cell = "D" + str(cell.row)
+            # level_cell = "E" + str(cell.row)
+            #
+            # login = str(self.login_box.text())
+            # name = str(UserBase.acell(name_cell).value) #Struggle
+            # email = str(UserBase.acell(email_cell).value) #Struggle
+            # score = str(UserBase.acell(score_cell).value) #Struggle
+            # level = str(UserBase.acell(level_cell).value) #Struggle
+
 
             creditscore = level + " (" + score + ")"
 
@@ -529,7 +528,6 @@ class Print_queue_app(QWidget):
         print(self.path_STL)
         if self.path_STL:
             self.stl_label.setText(self.short_STL)
-            print("505")
             self.file_check()
 
     # get_file is the function called to open a dialog box and return useful
@@ -600,13 +598,10 @@ class Print_queue_app(QWidget):
                     f'Length: {details["filament_used"]["mm"] / 1000:.3f}m')
                 # self.submit_button.setDisabled(False)
                 weight = f"{details['filament_used']['g']}g"
-                print("570")
                 self.file_check()
         # This bit is to change the style to indicate our 10 hour soft limit
 
-    # This is a rudimentary version checking setup, within the spreadsheet there
-    # is a cell dedicated to housing a version number, if the app is an old
-    # version it will display a popup box
+
 
     def SelectiveUI(self):
         self.clearUI()
@@ -679,6 +674,10 @@ class Print_queue_app(QWidget):
                 print("ADDED")
             self.credit_check()
 
+    # This is a rudimentary version checking setup, within the spreadsheet there
+    # is a cell dedicated to housing a version number, if the app is an old
+    # version it will display a popup box
+
     def version_check(self):
         version = self.Config["Version"]
         global sheet
@@ -695,7 +694,7 @@ class Print_queue_app(QWidget):
             sys.exit(1)
 
     # There was a rep who made me realise that this code may need some form of
-    # competency check and/or warnings.
+    # competency check and/or warnings (Tylerproof).
     def error_handling(self, n):
         msg = QMessageBox()
         msg.setWindowIcon(QIcon(self.littlelogopath))
@@ -704,7 +703,6 @@ class Print_queue_app(QWidget):
         else:
             msg.setIcon(QMessageBox.Information)
 
-        print(n)
         text = ["Please fill in all boxes",
                 "It looks like there was a network error.\nAre you on the university network?",
                 "This version of the program is critically out of date! \n\n Please download the latest version.",
@@ -773,11 +771,12 @@ class Print_queue_app(QWidget):
             self.error_handling(3)
         else:
             print("all good")
-            if level == "Beginner" and self.password() == "TRUE":
+            if (level == "Beginner" and self.password() == "TRUE"):
                 self.submit_file()
-
+            elif (level != "Beginner"):
+                self.submit_file()
             else:
-                self.submit_file()
+                print("This previously contained self.submit_file, not a good call - AJM 05/04/2022")
 
     def file_check(self):
         print("checking file")
@@ -808,6 +807,7 @@ class Print_queue_app(QWidget):
             msg = "Password: \nHint: It isnt the same as last year" + msg2
             text, ok = QInputDialog.getText(self, "Password", msg, QLineEdit.Password)
             if ok == False:
+                return "FALSE"
                 break
             if text == "maker5pace":
                 # Ah yes lets store the password as plain text, solid idea....
@@ -917,7 +917,6 @@ class Print_queue_app(QWidget):
 
 
             rows = sheet.row_count
-            print(rows)
             str_rows = str(rows)
             row_items = []  # list(details.values())
             for x in details["order"]:
@@ -960,6 +959,8 @@ class Print_queue_app(QWidget):
             self.activateWindow()
             self.raise_()
             self.show()
+            self.UserInfo = ["","","","","",""]
+            self.SelectiveUI()
             useful_string = "Uploaded " + self.short_GCODE + " at " + time + ", you are number " + queue + " in the queue."
             eta_string = "\n Our best time estimate is:\n" + eta
             self.status_label.setText(useful_string)
