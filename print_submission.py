@@ -247,6 +247,8 @@ class Print_queue_app(QWidget):
             self.timer.setInterval(600)
             if re.match("[a-zA-Z]+[0-9]+[a-zA-Z]+", self.login_box.text()):
                 self.timer.timeout.connect(self.credit_check)
+            elif ".AC.UK" in self.login_box.text():
+                self.timer.timeout.connect(self.credit_check)
             else:
                 self.score_label.setText("")
             self.timer.start()
@@ -730,7 +732,7 @@ class Print_queue_app(QWidget):
     # This is what caused the big bug all along, access token for google sheets
     # was expiring after 60 mins
     def reAuth(self):
-        print("Checking token")
+        print("Checking token,", end = ' ')
         if self.creds.access_token_expired:
             self.client.login()
             print("Reauthed")
