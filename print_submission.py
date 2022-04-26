@@ -185,6 +185,7 @@ class Print_queue_app(QWidget):
         self.rep_heading = QLabel('Rep name: ')
         gcode_heading = QLabel("File to upload:")
         self.status_heading = QLabel("Status:")
+        self.review_cbox = QCheckBox("Request Review")
 
         self.score_label = QLabel('')
         self.gcode_label = QLabel("No file selected")
@@ -437,6 +438,9 @@ class Print_queue_app(QWidget):
 
         # hBox_gcode.addWidget(self.SButton)
 
+        hBoxReview = QHBoxLayout()
+        hBoxReview.addWidget(self.review_cbox)
+
         hBoxSubmit = QHBoxLayout()
         hBoxSubmit.addWidget(self.submit_button)
         hBoxSubmit.addWidget(self.cancel_button)
@@ -459,6 +463,7 @@ class Print_queue_app(QWidget):
         self.vBox.addLayout(self.togglebox_3, Qt.AlignTop)
         self.vBox.addLayout(self.togglebox_2, Qt.AlignTop)
         self.vBox.addLayout(hBoxBlank2, Qt.AlignTop)
+        self.vBox.addLayout(hBoxReview)
         self.vBox.addLayout(hBoxSubmit)
         self.setLayout(self.vBox)
         if self.Config["config_options"]["View_buttons"] == 1:
@@ -752,6 +757,7 @@ class Print_queue_app(QWidget):
         self.submit_button.setDisabled(True)
         self.status_label.setStyleSheet('color:default')
         self.submit_button.setText("Submit")
+        self.review_cbox.setChecked(False)
 
         self.update_rep_names(True)
 
@@ -892,7 +898,7 @@ class Print_queue_app(QWidget):
                 sheet = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("Queue")
 
                 # Stops us doing a manual check
-                if hours >= 10:
+                if hours >= 10 or self.review_cbox.isChecked():
                     finalstatus = "Under review"
                 else:
                     finalstatus = "Queued"
