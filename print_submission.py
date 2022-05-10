@@ -176,9 +176,13 @@ class Print_queue_app(QWidget):
         # Boxes go on the right and are designed to be changed
 
         blank_heading = QLabel('')
+
+        #This welcome heading is me retaining some ownership of the code i spent a large amount of time on,
+        #please consult before changing it. I am emotionally attached to this as it represents a journey through uni.
         self.welcome_heading = QLabel(
-            "If the app to crashes consistently, send me an email at ajmitchell1@sheffield.ac.uk, thanks!")
-        # self.welcome_heading = QLabel("Send crash reports and feedbackIf you manage to get the app to crash, send me an email at ajmitchell1@sheffield.ac.uk describing what you did, Thanks!")
+            "If the app to crashes consistently, send me an email at alistair_mitchell@outlook.com, thanks!")
+        #Read the above comment
+
         self.name_heading = QLabel('Login: ')
         self.score_heading = QLabel('Level: ')
         self.project_heading = QLabel('Project type: ')
