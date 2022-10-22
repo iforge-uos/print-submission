@@ -1,8 +1,5 @@
-import math
 import re  # for searching
 import datetime  # for time formatting
-import time
-from array import *  # might be obsolete
 
 
 def run(fileName, short):

@@ -13,7 +13,6 @@ from PyQt5.QtCore import *
 from PyQt5 import QtCore
 from PyQt5.QtGui import *
 import datetime
-# import Config
 import re
 import webbrowser
 import os

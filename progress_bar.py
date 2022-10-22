@@ -1,16 +1,7 @@
-# GeorgePorterWindow.py
-# This file contains the app code for the george porter keys login / out window (the GeorgePorterWindow class).
 
-import datetime
-import re
-
-import gspread
 from PyQt5 import QtCore
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QLabel, \
-    QDialog, QMessageBox, QProgressBar
-import re
-# import Config
+from PyQt5.QtWidgets import QVBoxLayout, QLabel, QDialog, QProgressBar
 import get_path
 
 

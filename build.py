@@ -2,10 +2,7 @@ import sys
 import PyInstaller.__main__
 import os
 import shutil
-import re
-import fileinput
 from datetime import datetime
-import json
 import hashbrowns
 
 if __name__ == "__main__":

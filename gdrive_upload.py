@@ -1,5 +1,4 @@
 import mimetypes
-# import Config
 from progress_bar import The_Bar
 from oauth2client.service_account import ServiceAccountCredentials
 from googleapiclient.discovery import build, MediaFileUpload

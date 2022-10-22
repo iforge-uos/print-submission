@@ -1,12 +1,7 @@
-import sys
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
 import gcode_parse
 import os
-# import Config
-import logging
-import gdrive_upload
+
 
 
 class App(QWidget):

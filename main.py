@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import QApplication
 import sys
 import os
-import json
 
 import get_path
 import hashbrowns

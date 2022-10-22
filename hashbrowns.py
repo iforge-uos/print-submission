@@ -1,5 +1,3 @@
-# from cryptography.fernet import Fernet
-import time
 import get_path
 import json
 
