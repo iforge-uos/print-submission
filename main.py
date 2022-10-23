@@ -1,8 +1,6 @@
 from PyQt5.QtWidgets import QApplication
 import sys
 import os
-
-import get_path
 import hashbrowns
 from print_submission import Print_queue_app
 

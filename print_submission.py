@@ -15,12 +15,8 @@ from PyQt5.QtGui import *
 import datetime
 import re
 import webbrowser
-import os
 import string
-import traceback
-import time
 import LDAP
-import PyQt5.QtWidgets
 import pandas as pd
 
 QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)  # enable highdpi scaling
@@ -350,6 +346,7 @@ class Print_queue_app(QWidget):
         # everything is sorted into horizontal rows and then worked with from there
 
         hboxdemo = QHBoxLayout()
+        self.welcome_heading.setAlignment(Qt.AlignCenter)
         hboxdemo.addWidget(self.welcome_heading)
         # self.welcome_heading.setAlignment(QtCore.Qt.AlignCenter)
 
