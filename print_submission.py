@@ -277,7 +277,7 @@ class Print_queue_app(QWidget):
 
         # This part is for development purposes so i dont have to enter my
         # details every time
-        if self.Config["dev_options"]["autofill"] == 0:
+        if self.Config["dev_options"]["autofill"] == 1:
             self.login_box.setText("mea17ajm")
             self.rep_box.setText("Alistair M")
             self.project_box.setText("SOFTWARE TEST")
