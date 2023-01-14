@@ -18,6 +18,7 @@ import webbrowser
 import string
 import LDAP
 import pandas as pd
+import print_queue_api_client as api
 
 QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)  # enable highdpi scaling
 QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)  # use highdpi icons
@@ -74,19 +75,18 @@ class Print_queue_app(QWidget):
         if force_reauth:
             self.reAuth()
 
-        UserBase = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("User Database")
-        users = pd.DataFrame(UserBase.get_all_records(head=1))
-        reps = users[users["rep_auth"] == 1]
+        resp = self.db.users.get()
+        if resp['error']:
+            print("Database error in accessing user table")
+            self.Config["Rep_names"] = []
+        else:
+            users = resp['data']
+            reps = users[users["is_rep"]]
 
-        # generate rep name list, fallback on long name if no short provided
-        rep_list = []
-        for long, short in zip(reps["Name"], reps["short_name"]):
-            if not short:
-                rep_list.append(long)
-            else:
-                rep_list.append(short)
+            # generate rep name list, fallback on long name if no short provided
+            rep_list = [short if short else long for long, short in zip(reps["name"], reps["short_name"])]
 
-        self.Config["Rep_names"] = rep_list
+            self.Config["Rep_names"] = rep_list
 
     def startEverything(self):
         self.scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive',
@@ -94,6 +94,9 @@ class Print_queue_app(QWidget):
 
         self.creds = ServiceAccountCredentials._from_parsed_json_keyfile(self.Config["jason"], self.scope)
         self.client = gspread.authorize(self.creds)
+        self.db = api.database_api_factory(server_ip=self.Config["db_details"]["SERVER_IP"],
+                                               server_port=self.Config["db_details"]["SERVER_PORT"],
+                                               api_key=self.Config["db_details"]["API_KEY"])
 
         self.filing = file_dialog.App()
         self.filing.setConfig(self.Config)
@@ -479,46 +482,39 @@ class Print_queue_app(QWidget):
             if self.login_box.text() == "":
                 print("BLANK NAME")
                 raise
-            UserBase = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("User Database")
 
-            login,name,email,score,level = UserBase.row_values(UserBase.find(self.login_box.text()).row)[0:5]
+            # UserBase = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("User Database")
+            resp = self.db.users.get(self.login_box.text())
+            if resp['error']:
+                raise
 
-            # cell = UserBase.find(self.login_box.text()) #Struggle
+            score_text = f"{resp['data']['user_level'].iloc[0]} ({resp['data']['user_score'].iloc[0]})"
 
-            # name_cell = "B" + str(cell.row)
-            # email_cell = "C" + str(cell.row)
-            # score_cell = "D" + str(cell.row)
-            # level_cell = "E" + str(cell.row)
-            #
-            # login = str(self.login_box.text())
-            # name = str(UserBase.acell(name_cell).value) #Struggle
-            # email = str(UserBase.acell(email_cell).value) #Struggle
-            # score = str(UserBase.acell(score_cell).value) #Struggle
-            # level = str(UserBase.acell(level_cell).value) #Struggle
+            self.UserInfo = [resp['data']['username'].iloc[0],
+                             resp['data']['name'].iloc[0],
+                             resp['data']['email'].iloc[0],
+                             resp['data']['user_level'].iloc[0],
+                             resp['data']['user_score'].iloc[0],
+                             score_text]
 
-
-            creditscore = level + " (" + score + ")"
-
-            self.UserInfo = [login, name, email, level, score, creditscore]
-
-            print("login IS: " + login)
-            print("NAME IS: " + name)
-            print("EMAIL IS: " + email)
-            print("LEVEL IS: " + creditscore)
-            self.score_label.setText(creditscore)
+            print("LOGIN IS: " + self.UserInfo[0])
+            print("NAME IS: " + self.UserInfo[1])
+            print("EMAIL IS: " + self.UserInfo[2])
+            print("LEVEL (SCORE) IS: " + self.UserInfo[5])
+            self.score_label.setText(score_text)
             self.SelectiveUI()
         except Exception as e:
             if self.login_box.text() == "":
                 print("BLANK NAME EXCEPTION")
-                creditscore = ""
+                score_text = ""
                 level = ""
             else:
                 print("Not registered")
-                creditscore = "Not registered"
+                score_text = "Not registered"
                 level = "None"
-            self.score_label.setText(creditscore)
+            self.score_label.setText(score_text)
 
-            self.UserInfo = [0, 0, 0, level, 0, creditscore]
+            self.UserInfo = [0, 0, 0, level, 0, score_text]
             self.SelectiveUI()
         self.timer.stop()
 
@@ -669,16 +665,26 @@ class Print_queue_app(QWidget):
             print("LOGIN: " + self.login_box.text())
             print("EMAIL: " + LDAP_Results[1])
             if self.password() == "TRUE":
-                UserBase = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("User Database")
-                cell = self.next_available_row(UserBase)
-                LevelText = ("=if(D" + cell + '="","", VLOOKUP(D' + cell + ',Score_Parameters!$A$2:$C$7,3))')
-                UserBase.update_cell(cell, '1', self.login_box.text())  # Login
-                UserBase.update_cell(cell, '2', string.capwords(LDAP_Results[0]))  # Name
-                UserBase.update_cell(cell, '3', LDAP_Results[1])  # Email
-                UserBase.update_cell(cell, '4', 0)  # Level
-                UserBase.update_cell(cell, '5', LevelText)  # Level
+                # # Create user in spreadsheet
+                # UserBase = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("User Database")
+                # cell = self.next_available_row(UserBase)
+                # LevelText = ("=if(D" + cell + '="","", VLOOKUP(D' + cell + ',Score_Parameters!$A$2:$C$7,3))')
+                # UserBase.update_cell(cell, '1', self.login_box.text())  # Login
+                # UserBase.update_cell(cell, '2', string.capwords(LDAP_Results[0]))  # Name
+                # UserBase.update_cell(cell, '3', LDAP_Results[1])  # Email
+                # UserBase.update_cell(cell, '4', 0)  # Level
+                # UserBase.update_cell(cell, '5', LevelText)  # Level
 
-                print("ADDED")
+                # Create user in db
+                resp = self.db.users.create(
+                    username=self.login_box.text().lower(),
+                    name=LDAP_Results[0].title(),
+                    email=LDAP_Results[1].lower()
+                )
+                if resp['error']:
+                    print(f"User creation error: {resp['message']}")
+                else:
+                    print("ADDED")
             self.credit_check()
 
     # This is a rudimentary version checking setup, within the spreadsheet there

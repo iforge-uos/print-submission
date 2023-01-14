@@ -150,7 +150,7 @@ class Hashbrown:
 if __name__ == "__main__":
     with Hashbrown(password="force", build_mode=True) as hashbrown:
         """ Contents editing: """
-        # hashbrown.edit_contents()
+        hashbrown.edit_contents()
 
         """ Password changing: """
         # hashbrown.change_password()
