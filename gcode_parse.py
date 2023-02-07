@@ -60,9 +60,10 @@ def run(fileName, short):
                     print("Prusa Identified")
 
                 # Generic catch to see if the print is a non iForge but still prusa print
-                elif re.search("Prusa", line):
-                    parameters["printer_type"] = "Exotic_Prusa"
-                    print("Prusa Identified")
+                # TODO: *if* still wanted, rework to not overwrite detection of iforge profiles
+                # elif re.search("Prusa", line):
+                #     parameters["printer_type"] = "Exotic_Prusa"
+                #     print("Prusa Identified")
 
                 # Bodge to catch the iForge PETG profile, this will be done slightly better in future hopefully
                 elif re.search("iForge Prusa PETG", line):

@@ -961,7 +961,8 @@ class Print_queue_app(QWidget):
                     "%H:%M:%S") + ", you are number " + queue + " in the queue."
                 eta_string = "\n Our best time estimate is:\n" + eta
                 status_string = useful_string  # + eta_string
-                self.status_label.setText(status_string)
+
+                msg = QMessageBox.information(self, 'Job Submission Successful', f"{status_string}", QMessageBox.Ok)
 
             self.clearall()
             self.clearUI()
