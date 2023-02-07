@@ -159,10 +159,10 @@ class Print_queue_app(QWidget):
             # Setting Pallete for Program
             self.setStyleSheet(self.stylesheet)
 
-        self.path_GCODE = ""
-        self.short_GCODE = ""
-        self.path_STL = ""
-        self.short_STL = ""
+        self.gcode_path = ""
+        self.gcode_filename = ""
+        self.stl_path = ""
+        self.stl_filename = ""
 
         # Set up the labels for data entry boxes
 
@@ -178,7 +178,7 @@ class Print_queue_app(QWidget):
         #This welcome heading is me retaining some ownership of the code i spent a large amount of time on,
         #please consult before changing it. I am emotionally attached to this as it represents a journey through uni.
         self.welcome_heading = QLabel(
-            "If the app crashes consistently, send me an email at alistair_mitchell@outlook.com, thanks!")
+            "If the app crashes consistently, please contact 3DP Alumni via Discord, thanks!")
         #Read the above comment
 
         self.name_heading = QLabel('Login: ')
@@ -315,8 +315,8 @@ class Print_queue_app(QWidget):
         self.chooseGCODE_button.setDisabled(True)
 
         # Connect the buttons with their respective functions for submission etc
-        self.sheet_button.clicked.connect(self.sheet)
-        self.drive_button.clicked.connect(self.drive)
+        self.sheet_button.clicked.connect(self.sheet_webobject)
+        self.drive_button.clicked.connect(self.drive_webobject)
         self.submit_button.clicked.connect(self.field_check)
         self.register_button.clicked.connect(self.RegisterUser)
 
@@ -527,10 +527,10 @@ class Print_queue_app(QWidget):
 
     def STL_and_send(self):
         print("STL AND SEND")
-        self.path_STL, self.short_STL = self.filing.openFileNameDialog_STL()
-        print(self.path_STL)
-        if self.path_STL:
-            self.stl_label.setText(self.short_STL)
+        self.stl_path, self.stl_filename = self.filing.openFileNameDialog_STL()
+        print(self.stl_path)
+        if self.stl_path:
+            self.stl_label.setText(self.stl_filename)
             self.file_check()
 
     # get_file is the function called to open a dialog box and return useful
@@ -542,7 +542,7 @@ class Print_queue_app(QWidget):
             if location == "":
                 print("Clicked")
                 # self.filing.openFileNameDialog_GCODE()
-                self.path_GCODE, self.short_GCODE = self.filing.openFileNameDialog_GCODE()
+                self.gcode_path, self.gcode_filename = self.filing.openFileNameDialog_GCODE()
                 # print("b= "+b)
             else:
                 print("Dropped")
@@ -568,32 +568,32 @@ class Print_queue_app(QWidget):
             self.status_label.setStyleSheet('color:default')
             self.submit_button.setText("Submit")
             self.status_label.setText(" ")
-            self.short_GCODE = details["filename"]
-            self.path_GCODE = details["path"]
+            self.gcode_filename = details["filename"]
+            self.gcode_path = details["path"]
             time = re.findall('\d+', details["time_taken"])
             global hours
             hours = int(time[0])
-            print(self.path_GCODE)
+            print(self.gcode_path)
             if hours >= 10:
                 self.status_label.setStyleSheet('color:red')
                 self.submit_button.setText("Bit long isnt it?")
             if details["printer_type"] == printer_oops:
-                self.gcode_label.setText(self.short_GCODE)
+                self.gcode_label.setText(self.gcode_filename)
                 self.status_label.setStyleSheet('color:red')
                 self.status_label.setText("Unsupported printer or profile. \nMaybe get a rep to check the gcode again.")
                 self.submit_button.setDisabled(True)
             elif details["printer_type"] == "Prusa MK2":
-                self.gcode_label.setText(self.short_GCODE)
+                self.gcode_label.setText(self.gcode_filename)
                 self.status_label.setStyleSheet('color:red')
                 self.status_label.setText("Prusa control may not be set up correctly.\n\nPlease reslice!")
                 self.submit_button.setDisabled(True)
             elif details["printer_type"] == "non_iforge":
-                self.gcode_label.setText(self.short_GCODE)
+                self.gcode_label.setText(self.gcode_filename)
                 self.status_label.setStyleSheet('color:red')
                 self.status_label.setText("Sliced using non-iForge settings, please reslice using our presets")
                 self.submit_button.setDisabled(True)
             else:
-                self.gcode_label.setText(self.short_GCODE)
+                self.gcode_label.setText(self.gcode_filename)
                 self.status_label.setText(
                     f'Printer: {details["printer_type"]}\n'
                     f'Estimated time: {details["time_taken"]}\n'
@@ -806,7 +806,7 @@ class Print_queue_app(QWidget):
 
         if self.UserInfo[3] == "Intermediate":
             print(self.UserInfo[3])
-            if self.path_STL != "" and self.path_GCODE != "":
+            if self.stl_path != "" and self.gcode_path != "":
                 self.submit_button.setDisabled(False)
                 print("File accepted")
         else:
@@ -869,23 +869,23 @@ class Print_queue_app(QWidget):
         # STL upload code
         if level == "Intermediate":
             print("STL uploading")
-            self.Config["short"] = self.short_STL
-            status, id_STL = gdrive_upload.run(self.path_STL, self.short_STL, self, self.Config)
+            self.Config["filename"] = self.stl_filename
+            status, stl_id = gdrive_upload.run(self.stl_path, self.stl_filename, self, self.Config)
             if status == 1:
                 print("STL uploaded")
             else:
-                keep = self.failedmessage()
-                if keep == 0:
+                keep_field_entry = self.failedmessage()
+                if not keep_field_entry:
                     self.clearall()
                 sheet.delete_row(rows)
                 return
 
         print("GCODE uploading")
-        self.Config["short"] = self.short_GCODE
-        status, id_GCODE = gdrive_upload.run(self.path_GCODE, self.short_GCODE, self, self.Config)
+        self.Config["filename"] = self.gcode_filename
+        status, gcode_id = gdrive_upload.run(self.gcode_path, self.gcode_filename, self, self.Config)
 
-        details["filename"] = f'=HYPERLINK("https://drive.google.com/u/0/uc?export=download&id={id_GCODE}",' \
-                              f'"{self.short_GCODE}")'
+        details["filename"] = f'=HYPERLINK("https://drive.google.com/u/0/uc?export=download&id={gcode_id}",' \
+                              f'"{self.gcode_filename}")'
 
         if status == 1:
             print("GCODE uploaded")
@@ -984,20 +984,20 @@ class Print_queue_app(QWidget):
             status_string = useful_string
             self.status_label.setText(status_string)
 
-            self.path_GCODE = ""
-            self.short_GCODE = ""
-            self.path_STL = ""
-            self.short_STL = ""
+            self.gcode_path = ""
+            self.gcode_filename = ""
+            self.stl_path = ""
+            self.stl_filename = ""
 
         else:
-            keep = self.failedmessage()
-            if keep == 0:
+            keep_field_entry = self.failedmessage()
+            if not keep_field_entry:
                 self.clearall()
             sheet.delete_row(rows)  # TODO: fix references to `sheet` when not declared, needs refactoring _a lot_ to `self.sheet` (same for `rows`)
             return
 
-    def sheet(self):
+    def sheet_webobject(self):
         webbrowser.open_new(self.Config["spreadsheet"])
 
-    def drive(self):
+    def drive_webobject(self):
         webbrowser.open_new(self.Config["Queuefolder"])

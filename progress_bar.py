@@ -21,7 +21,7 @@ class The_Bar(QDialog):
         self.progress = QProgressBar()
         self.progress.setMinimum(0)
         self.progress.setMaximum(100)
-        self.Message = QLabel("Uploading " + self.Config["short"])
+        self.Message = QLabel("Uploading " + self.Config["filename"])
         self.Message.setWordWrap(True)
         self.Message2 = QLabel("")
 
