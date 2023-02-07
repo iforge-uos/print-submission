@@ -570,9 +570,8 @@ class Print_queue_app(QWidget):
             self.status_label.setText(" ")
             self.gcode_filename = details["filename"]
             self.gcode_path = details["path"]
-            time = re.findall('\d+', details["time_taken"])
             global hours
-            hours = int(time[0])
+            hours = int(details["time_taken"]/3600)
             print(self.gcode_path)
             if hours >= 10:
                 self.status_label.setStyleSheet('color:red')
@@ -618,11 +617,11 @@ class Print_queue_app(QWidget):
         elif level == "None":
             self.register_button.setDisabled(False)
 
-        elif level == "Beginner":
+        elif level == "beginner":
             self.togglebox_1.addWidget(self.groupBox1)  # Rep login box
             self.togglebox_2.addWidget(self.groupBox2)  # GCODE submission box
             self.chooseGCODE_button.setDisabled(False)
-        elif level == "Intermediate":
+        elif level == "intermediate":
             print("MID TIER")
             self.togglebox_2.addWidget(self.groupBox2)  # GCODE submission box
             self.togglebox_3.addWidget(self.groupBox3)  # STL submission box
@@ -780,14 +779,15 @@ class Print_queue_app(QWidget):
         elif self.project_box.text() == "":
             print("no project")
             self.error_handling(0)
-        elif level == "Beginner" and self.rep_box.text() not in self.Config["Rep_names"]:
-            print("Fill the rep box")
-            self.error_handling(3)
+        # TODO: handle return for incorrect rep
+        # elif level == "Beginner" and self.rep_box.text() not in self.Config["Rep_names"]:
+        #     print("Fill the rep box")
+        #     self.error_handling(3)
         else:
             print("all good")
-            if (level == "Beginner" and self.password() == "TRUE"):
+            if (level == "beginner" and self.password() == "TRUE"):
                 self.submit_file()
-            elif (level != "Beginner"):
+            elif (level != "beginner"):
                 self.submit_file()
             else:
                 print("This previously contained self.submit_file, not a good call - AJM 05/04/2022")
@@ -845,17 +845,34 @@ class Print_queue_app(QWidget):
     def submit_file(self):
         self.reAuth()
 
-        level = self.UserInfo[3]
+        resp = self.db.users.get(self.UserInfo[2])  # get user by email
+        if resp["error"]:
+            print("fetching user failed")
+            raise
 
-        self.path_GCODE = details["path"]
-        self.short_GCODE = details["filename"]
+        user = resp["data"].to_dict(orient='records')[0]  # get dataframe as list of dicts (item per row), keep first
+
+        # TODO: get rep
+        # resp = self.db.users.get(self.UserInfo[2])  # get rep by email
+        # if resp["error"]:
+        #     print("fetching rep failed")
+        #     raise
+        #
+        # rep = resp["data"].to_dict(orient='records')[0]  # get dataframe as list of dicts (item per row), keep first
+
+        level = user['user_level'].lower()
+
+        # Breaks here if: file selected -> file selection re-opened -> file selection cancelled
+        # (still says old file selected in UI, disagrees with stored details)
+        self.gcode_path = details["path"]
+        self.gcode_filename = details["filename"]
 
         details["name"] = (self.UserInfo[1])  # Name
         details["email"] = (self.UserInfo[2])  # Email
 
-        details["project_type"] = string.capwords(self.project_box.text())
+        details["project_type"] = self.project_box.text().title()
 
-        # Not sure if this bit works, needs checking
+        # "recent entries" functionality - not sure if this bit works, needs checking
         if self.login_box.text() not in self.Config["RecentName"]:
             self.Config["RecentName"].append(self.login_box.text())
             self.Config["RecentProject"].append(self.project_box.text())
@@ -867,7 +884,8 @@ class Print_queue_app(QWidget):
             self.login_box.setCompleter(completer)
 
         # STL upload code
-        if level == "Intermediate":
+        if level in ["intermediate"]:
+            # TODO: not db safe
             print("STL uploading")
             self.Config["filename"] = self.stl_filename
             status, stl_id = gdrive_upload.run(self.stl_path, self.stl_filename, self, self.Config)
@@ -877,7 +895,6 @@ class Print_queue_app(QWidget):
                 keep_field_entry = self.failedmessage()
                 if not keep_field_entry:
                     self.clearall()
-                sheet.delete_row(rows)
                 return
 
         print("GCODE uploading")
@@ -895,79 +912,60 @@ class Print_queue_app(QWidget):
                 "path"] = ""  # clear the array at 10 so we dont get it in the spreadsheet, just using as a variable conveyor
             self.status_label.setVisible(True)
 
-            if level == "Intermediate":
-                sheet = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("Need Approval")
-                finalstatus = "Awaiting approval"
-                hyperlink_irepcheck = '=HYPERLINK("https://drive.google.com/file/d/' + id_STL + '/view","STL")'
-                details["rep_check"] = hyperlink_irepcheck
+            # TODO: support 'intermediate' users in db
+            # if level == "intermediate":
+            #     sheet = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("Need Approval")
+            #     finalstatus = "Awaiting approval"
+            #     hyperlink_irepcheck = '=HYPERLINK("https://drive.google.com/file/d/' + stl_id + '/view","STL")'
+            #     details["rep_check"] = hyperlink_irepcheck
+
+            """
+            # for creating job:
+            required_args = ["gcode_slug", "filament_usage", "print_name", "print_time", "printer_type", "project",
+                     "user_id"]
+            optional_args = ["colour", "date_added", "date_started", "date_ended", "printer", "project_string",
+                             "queue_notes", "rep_check", "status", "stl_slug", "upload_notes"]
+            """
+
+            job_args = {
+                "user_id": user['id'],
+                "gcode_slug": gcode_id,
+                "filament_usage": details['filament_used']['g'],
+                "print_name": self.gcode_filename,
+                "print_time": details['time_taken'],
+                "printer_type": details['printer_type'].lower(),
+                "project": details['project_type'].lower()
+            }
+
+            if self.review_cbox.isChecked():
+                job_args["status"] = "under review"
+
+            if self.rep_box.text():
+                job_args["rep_check"] = self.rep_box.text()
+
+            resp = self.db.jobs.create(**job_args)
+
+            if resp['error']:
+                msg = QMessageBox.warning(self, 'Job Submission Failed',
+                                           f"Reason:\n{resp['message']}\n\nPlease correct your submission or contact 3DP",
+                                           QMessageBox.Ok)
+
             else:
-                sheet = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("Queue")
+                print("main details added")
 
-                # Stops us doing a manual check
-                if hours >= 10 or self.review_cbox.isChecked():
-                    finalstatus = "Under review"
-                else:
-                    finalstatus = "Queued"
+                # TODO: fixme!!!
+                eta = "{soon, we promise!}"
+                queue = "{we've lost count!}"
 
-                if level == "Beginner":
-                    # details["rep_check"]=string.capwords(self.rep_box.text()) #CAPS
-                    details["rep_check"] = self.rep_box.text()
-                else:
-                    details["rep_check"] = "Unchecked"
-
-                if not re.findall("https://drive.google.com/file/d/", details["rep_check"]):
-                    leaderboard_sheet = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("Leaderboard")
-                    lb = pd.DataFrame(leaderboard_sheet.get_all_records(head=2))[
-                        ["Fail & Reject rate", "Names"]].set_index("Names")
-                    try:
-                        err_perc = float(lb.loc[details["rep_check"], "Fail & Reject rate"].strip("%")) / 100.0
-                        # if rep has a lot of failed/rejected prints
-                        if err_perc >= 0.20:
-                            finalstatus = "Under review"
-                    except KeyError as e:
-                        print(e)
-                        # rep not in leaderboard, ie first print
-                        finalstatus = "Under review"
-
-
-            rows = sheet.row_count
-            str_rows = str(rows)
-            row_items = []  # list(details.values())
-            for x in details["order"]:
-                if x == "filament_used":
-                    row_items.append(details[x]["g"])
-                else:
-                    row_items.append(details[x])
-
-            sheet.insert_row(row_items, rows, value_input_option='USER_ENTERED')
-            # if getting funny results make sure theres a free row at the base
-            print("main details added")
-
-            cell_id = f"G{str_rows}"
-            # format as date (hide time)
-            sheet.format(cell_id, {"numberFormat": {"type": "DATE", "pattern": "dd/mm/yyyy"}})
-
-            sheet.update_cell(rows, '15', id_GCODE)
-
-            formula1 = f'=IFERROR(if(P{str_rows}<>"", (D{str_rows}+P{str_rows}),""),"")'
-            formula2 = "=IFERROR(if(I" + str_rows + '="complete", (NOW()-G' + str_rows + '),""),"")'
-            # formula3 = "=AVERAGE(R" + str(int(rows) - 20) + ":R" + str_rows + ")"
-            formula4 = '=COUNTIFS(K$4:K,K' + str_rows + ',I$4:I,"Running")'
-            sheet.update_cell(rows, '17', formula1)
-            sheet.update_cell(rows, '18', formula2)
-            sheet.update_cell(rows, '19', formula4)
-            sheet.update_cell(rows, '9', finalstatus)
-
-            log_sheet = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("Print Log")
-            eta = log_sheet.acell("S1").value.split('\n')[1]
+                useful_string = "Uploaded " + self.gcode_filename + " at " + datetime.datetime.now().strftime(
+                    "%H:%M:%S") + ", you are number " + queue + " in the queue."
+                eta_string = "\n Our best time estimate is:\n" + eta
+                status_string = useful_string  # + eta_string
+                self.status_label.setText(status_string)
 
             self.clearall()
             self.clearUI()
 
-            fulltime = datetime.datetime.now()
-            time = fulltime.strftime("%H:%M:%S")
-            queue = str(sheet.acell("I2").value)
-            queuemore = str(sheet.acell("N1").value)
             self.ProgressBar.close()
             self.setWindowState((self.windowState() & ~Qt.WindowMinimized) | Qt.WindowActive)
             self.activateWindow()
@@ -975,14 +973,6 @@ class Print_queue_app(QWidget):
             self.show()
             self.UserInfo = ["","","","","",""]
             self.SelectiveUI()
-            useful_string = "Uploaded " + self.short_GCODE + " at " + time + ", you are number " + queue + " in the queue."
-            eta_string = "\n Our best time estimate is:\n" + eta
-            self.status_label.setText(useful_string)
-
-            useful_string = "Uploaded " + self.short_GCODE + " at " + time + ", you are number " + queue + " in the queue."
-            eta_string = "\n Our best time estimate is:\n" + eta
-            status_string = useful_string
-            self.status_label.setText(status_string)
 
             self.gcode_path = ""
             self.gcode_filename = ""
@@ -993,7 +983,6 @@ class Print_queue_app(QWidget):
             keep_field_entry = self.failedmessage()
             if not keep_field_entry:
                 self.clearall()
-            sheet.delete_row(rows)  # TODO: fix references to `sheet` when not declared, needs refactoring _a lot_ to `self.sheet` (same for `rows`)
             return
 
     def sheet_webobject(self):

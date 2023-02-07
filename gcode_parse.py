@@ -78,7 +78,11 @@ def run(fileName, short):
                     if tmp:
                         times[elem] = int(tmp[0])
 
-                time = f"{times['d'] * 24 + times['h']:02d}:{times['m']:02d}:{times['s']:02d}"  # Formatting to ensure two digits in minutes and seconds
+                # time = f"{times['d'] * 24 + times['h']:02d}:{times['m']:02d}:{times['s']:02d}"  # Formatting to ensure two digits in minutes and seconds
+
+                # format time_taken in seconds
+                time = times['s'] + times['m'] * 60 + times['h'] * 3600 + times['d'] * 86400
+
                 parameters["time_taken"] = time
 
             if len(parameters["filament_used"]) != 3 and re.search("(?<=; filament used \[)\w+(?=\])", line):
