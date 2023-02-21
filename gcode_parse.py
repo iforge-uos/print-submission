@@ -54,10 +54,13 @@ def run(fileName, short):
                     # if parameters["printer_type"]=="printer_type" and re.search("UltiG",line) : #this whole section could be cleaner
                     print("Ultimaker")
                     parameters["printer_type"] = "Ultimaker"
+                elif re.search("iForge PETG", line):
+                    print("Prusa PETG")
+                    parameters["printer_type"] = "Exotic_Prusa"
 
-                elif re.search("iForge Prusa", line):
+                elif re.search("iForge PLA", line):
                     parameters["printer_type"] = "Prusa"
-                    print("Prusa Identified")
+                    print("Prusa PLA")
 
             if not parameters["time_taken"] and re.search("(normal mode)", line):
 
