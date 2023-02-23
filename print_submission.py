@@ -943,9 +943,17 @@ class Print_queue_app(QWidget):
             if self.rep_box.text():
                 job_args["rep_check"] = self.rep_box.text()
 
+            # Botch-fix project type
+            # TODO: fix enums on db server side
+            valid_project_types = ["personal", "uni_module", "co_curricular", "society", "other"]
+            if job_args["project"] not in valid_project_types:
+                job_args["project_string"] = job_args["project"]
+                job_args["project"] = "other"
+
             resp = self.db.jobs.create(**job_args)
 
             if resp['error']:
+                print("an error was encountered")
                 msg = QMessageBox.warning(self, 'Job Submission Failed',
                                            f"Reason:\n{resp['message']}\n\nPlease correct your submission or contact 3DP",
                                            QMessageBox.Ok)
