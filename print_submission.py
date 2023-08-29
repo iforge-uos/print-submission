@@ -18,6 +18,8 @@ import webbrowser
 import string
 import LDAP
 import pandas as pd
+import keyboard
+from qt_material import apply_stylesheet
 
 QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)  # enable highdpi scaling
 QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)  # use highdpi icons
@@ -88,6 +90,17 @@ class Print_queue_app(QWidget):
 
         self.Config["Rep_names"] = rep_list
 
+
+    def Theme_Swap(self, event):
+        print("clicked")
+        if keyboard.read_key() == "shift":
+            if self.style == 0:
+                apply_stylesheet(self, 'dark_red.xml')
+                self.style = 1
+            else:
+                apply_stylesheet(self, 'light_red.xml', invert_secondary=True)
+                self.style = 0
+
     def startEverything(self):
         self.scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive',
                       "https://www.googleapis.com/auth/spreadsheets"]
@@ -104,10 +117,12 @@ class Print_queue_app(QWidget):
         self.biglogopath = get_path.go('resources/iForge_logo_no_background_small.png')
         self.littlelogopath = get_path.go('resources/printq50.png')
 
+
+
         self.version_check()
 
         self.setWindowTitle("iForge 3D Print Submission")
-        self.setWindowIcon(QIcon(self.littlelogopath))feat:
+        self.setWindowIcon(QIcon(self.littlelogopath))
 
         screen = self.Config["app"].primaryScreen()
         size = screen.size()
@@ -128,6 +143,13 @@ class Print_queue_app(QWidget):
 
         self.logo.setPixmap(QPixmap(self.biglogopath))
         self.logo.setToolTip("Build " + str(self.Config["Version"]))
+
+        self.logo.installEventFilter(self)
+
+
+        self.logo.mousePressEvent = self.Theme_Swap
+        self.style = 0
+
 
         # I hate the way this looks -AJM
         # SETTING DARK MODE

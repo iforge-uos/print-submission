@@ -29,6 +29,7 @@ def main(cfg):
     appWindow.setConfig(cfg)
 
     apply_stylesheet(app, theme='light_red.xml', invert_secondary=True)
+    # apply_stylesheet(app, theme='dark_red.xml')
     appWindow.startEverything()
     appWindow.show()
     sys.exit(app.exec_())
