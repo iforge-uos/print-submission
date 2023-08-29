@@ -28,7 +28,7 @@ def run(fileName,short, window, Config):
         # 'mimeType': 'text/plain', #Fairly sure this isnt needed
         "parents": [Config["FolderID"]]
             }
-    pbar = tqdm(total=100)
+    # pbar = tqdm(total=100)
     window.ProgressBar = The_Bar()
     window.ProgressBar.setConfig(Config)
     window.ProgressBar.initUi()
@@ -41,8 +41,8 @@ def run(fileName,short, window, Config):
         status, response = request.next_chunk()
         if status:
             percent=status.progress() * 100
-            pbar.n = percent
-            pbar.refresh()
+            # pbar.n = percent
+            # pbar.refresh()
 
             # delta = percent - lastvalue
             # pbar.update(delta)
@@ -50,8 +50,8 @@ def run(fileName,short, window, Config):
             # print ("Uploaded %.2f%%" % (percent))
             window.ProgressBar.update(percent)
             Config["app"].processEvents()
-    pbar.n = 100
-    pbar.refresh()
+    # pbar.n = 100
+    # pbar.refresh()
     print("file uploaded")
     window.ProgressBar.update(100)
 

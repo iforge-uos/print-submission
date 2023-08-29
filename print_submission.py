@@ -106,8 +106,8 @@ class Print_queue_app(QWidget):
 
         self.version_check()
 
-        self.setWindowTitle("The Print Queue")
-        self.setWindowIcon(QIcon(self.littlelogopath))
+        self.setWindowTitle("iForge 3D Print Submission")
+        self.setWindowIcon(QIcon(self.littlelogopath))feat:
 
         screen = self.Config["app"].primaryScreen()
         size = screen.size()
@@ -331,12 +331,12 @@ class Print_queue_app(QWidget):
         self.score_heading.setFixedWidth(width)
         self.project_heading.setFixedWidth(width)
         self.rep_heading.setFixedWidth(width)
-        self.chooseGCODE_button.setFixedWidth(width)
-        self.chooseSTL_button.setFixedWidth(width)
+        # self.chooseGCODE_button.setFixedWidth(width)
+        # self.chooseSTL_button.setFixedWidth(width)
         self.status_heading.setFixedWidth(width + 20)
         gcode_heading.setFixedWidth(width + 20)
 
-        self.status_label.setFixedHeight(80)
+        # self.status_label.setFixedHeight(80)
 
         self.login_box.setStyleSheet('color: rgb(0, 0, 0);')
         self.project_box.setStyleSheet('color: rgb(0, 0, 0);')
@@ -405,9 +405,9 @@ class Print_queue_app(QWidget):
         self.groupBox2.setTitle("Browse and upload .GCODE:")
         hBox_gcode = QHBoxLayout()
         hBox_gcode.addWidget(self.chooseGCODE_button)
-        hBox_gcode.addWidget(self.gcode_label)
+        # hBox_gcode.addWidget(self.gcode_label)
         hBox_status = QHBoxLayout()
-        hBox_status.addWidget(self.status_heading)
+        # hBox_status.addWidget(self.status_heading)
         hBox_status.addWidget(self.status_label)
 
         vBox_toggle2 = QVBoxLayout()
@@ -452,9 +452,9 @@ class Print_queue_app(QWidget):
         self.logo.setAlignment(QtCore.Qt.AlignCenter)
         self.vBox = QVBoxLayout()
         self.vBox.addWidget(self.logo)
-        self.vBox.addLayout(hBoxBlank3)
+        # self.vBox.addLayout(hBoxBlank3)
         self.vBox.addLayout(hboxdemo)
-        self.vBox.addLayout(hBoxBlank)
+        # self.vBox.addLayout(hBoxBlank)
 
         self.vBox.addLayout(hBoxName)
         self.vBox.addWidget(groupBox, Qt.AlignTop)
@@ -462,7 +462,7 @@ class Print_queue_app(QWidget):
         self.vBox.addLayout(self.togglebox_1, Qt.AlignTop)
         self.vBox.addLayout(self.togglebox_3, Qt.AlignTop)
         self.vBox.addLayout(self.togglebox_2, Qt.AlignTop)
-        self.vBox.addLayout(hBoxBlank2, Qt.AlignTop)
+        # self.vBox.addLayout(hBoxBlank2, Qt.AlignTop)
         self.vBox.addLayout(hBoxReview)
         self.vBox.addLayout(hBoxSubmit)
         self.setLayout(self.vBox)
@@ -598,11 +598,28 @@ class Print_queue_app(QWidget):
                 self.submit_button.setDisabled(True)
             else:
                 self.gcode_label.setText(self.short_GCODE)
+                if len(self.short_GCODE) > 32:
+                    even_shorter = (self.short_GCODE[:32] + '...')
+                    print("LONG")
+                    print(even_shorter)
+                else:
+                    even_shorter = self.short_GCODE
+                self.chooseGCODE_button.setText(even_shorter)
+                self.chooseGCODE_button.setToolTip(self.short_GCODE)
                 self.status_label.setText(
-                    f'Printer: {details["printer_type"]}\n'
-                    f'Estimated time: {details["time_taken"]}\n'
-                    f'Filament used: {details["filament_used"]["g"]:.3f}g\n'
-                    f'Length: {details["filament_used"]["mm"] / 1000:.3f}m')
+                    '{:<25s}\t{:25s}\n{:<25s}\t{:25s}'.format(
+                        f'Printer: {details["printer_type"]}',
+                        f'Estimated time: {details["time_taken"]}',
+                        f'Length: {details["filament_used"]["mm"] / 1000:.3f}m',
+                        f'Filament used: {details["filament_used"]["g"]:.3f}g')
+                    # f'Printer: {details["printer_type"]}   '
+                    # f'Estimated time: {details["time_taken"]}\n'
+                    # f'Filament used: {details["filament_used"]["g"]:.3f}g   '
+                    # f'Length: {details["filament_used"]["mm"] / 1000:.3f}m')
+
+
+
+                )
                 # self.submit_button.setDisabled(False)
                 weight = f"{details['filament_used']['g']}g"
                 self.file_check()
@@ -645,6 +662,8 @@ class Print_queue_app(QWidget):
         self.chooseGCODE_button.setDisabled(True)
         self.chooseSTL_button.setDisabled(True)
         self.submit_button.setDisabled(True)
+        self.chooseGCODE_button.setText("Choose file")
+        self.chooseGCODE_button.setToolTip("")
         self.groupBox0.setParent(None)
         self.groupBox1.setParent(None)
         # self.groupBox2.setParent(None)
@@ -696,7 +715,7 @@ class Print_queue_app(QWidget):
                 self.error_handling(2)
                 sys.exit(1)
         except Exception as e:
-            raise e
+            # raise e
             self.error_handling(6)
             sys.exit(1)
 
@@ -838,9 +857,7 @@ class Print_queue_app(QWidget):
     # drive and upload its various details to the spreadsheet.
     def submit_file(self):
         self.reAuth()
-
         level = self.UserInfo[3]
-
         self.path_GCODE = details["path"]
         self.short_GCODE = details["filename"]
 
@@ -865,6 +882,7 @@ class Print_queue_app(QWidget):
             print("STL uploading")
             self.Config["short"] = self.short_STL
             status, id_STL = gdrive_upload.run(self.path_STL, self.short_STL, self, self.Config)
+
             if status == 1:
                 print("STL uploaded")
             else:
@@ -877,7 +895,6 @@ class Print_queue_app(QWidget):
         print("GCODE uploading")
         self.Config["short"] = self.short_GCODE
         status, id_GCODE = gdrive_upload.run(self.path_GCODE, self.short_GCODE, self, self.Config)
-
         details["filename"] = f'=HYPERLINK("https://drive.google.com/u/0/uc?export=download&id={id_GCODE}",' \
                               f'"{self.short_GCODE}")'
 
@@ -897,6 +914,7 @@ class Print_queue_app(QWidget):
             else:
                 sheet = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("Queue")
 
+
                 # Stops us doing a manual check
                 if hours >= 10 or self.review_cbox.isChecked():
                     finalstatus = "Under review"
@@ -908,7 +926,6 @@ class Print_queue_app(QWidget):
                     details["rep_check"] = self.rep_box.text()
                 else:
                     details["rep_check"] = "Unchecked"
-
                 if not re.findall("https://drive.google.com/file/d/", details["rep_check"]):
                     leaderboard_sheet = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("Leaderboard")
                     lb = pd.DataFrame(leaderboard_sheet.get_all_records(head=2))[
@@ -932,7 +949,6 @@ class Print_queue_app(QWidget):
                     row_items.append(details[x]["g"])
                 else:
                     row_items.append(details[x])
-
             sheet.insert_row(row_items, rows, value_input_option='USER_ENTERED')
             # if getting funny results make sure theres a free row at the base
             print("main details added")
@@ -969,12 +985,16 @@ class Print_queue_app(QWidget):
             self.show()
             self.UserInfo = ["","","","","",""]
             self.SelectiveUI()
-            useful_string = "Uploaded " + self.short_GCODE + " at " + time + ", you are number " + queue + " in the queue."
+            if len(self.short_GCODE) > 20:
+                even_shorter = (self.short_GCODE[:20] + '...')
+                print("LONG")
+                print(even_shorter)
+            else:
+                even_shorter = self.short_GCODE
+            useful_string = "Uploaded " + even_shorter + " at " + time + "\nYou are number " + queue + " in the queue."
             eta_string = "\n Our best time estimate is:\n" + eta
             self.status_label.setText(useful_string)
 
-            useful_string = "Uploaded " + self.short_GCODE + " at " + time + ", you are number " + queue + " in the queue."
-            eta_string = "\n Our best time estimate is:\n" + eta
             status_string = useful_string
             self.status_label.setText(status_string)
 

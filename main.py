@@ -3,6 +3,10 @@ import sys
 import os
 import hashbrowns
 from print_submission import Print_queue_app
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+
+from qt_material import apply_stylesheet
 
 
 def main(cfg):
@@ -23,6 +27,8 @@ def main(cfg):
     # global appWindow
     appWindow = Print_queue_app()
     appWindow.setConfig(cfg)
+
+    apply_stylesheet(app, theme='light_red.xml', invert_secondary=True)
     appWindow.startEverything()
     appWindow.show()
     sys.exit(app.exec_())
