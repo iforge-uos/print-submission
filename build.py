@@ -49,6 +49,7 @@ if __name__ == "__main__":
             # '--hidden-import=googleapiclient',
             # '--hidden-import=googleapiclient.discovery',
             # '--hidden-import=tqdm',
+            '--hidden-import=keyboard',
             '--icon=%s' % os.path.join('resources/printq50icon.ico'),
             os.path.join('main.py'),
         ])
