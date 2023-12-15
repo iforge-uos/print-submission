@@ -11,7 +11,7 @@ def run(fileName,short, window, Config):
 
     DIRNAME = os.path.dirname(__file__) #Don't ask, it works
     creds = ServiceAccountCredentials._from_parsed_json_keyfile(Config["jason"], scope)
-    DRIVE = build('drive','v3',credentials=creds)
+    DRIVE = build('drive', 'v3', credentials=creds, static_discovery=False)
     mimetypes.add_type("text/plain", ".gcode") #gets rid of mime error withot regedit
     filename = fileName #'code.gcode' #Just seen this and i cant for love nor money figure out what i was thinking
     # mimeType = 'text/plain' #Fairly sure this is no longer needed
