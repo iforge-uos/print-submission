@@ -57,6 +57,9 @@ def run(fileName, short):
                 elif re.search("iForge PETG", line):
                     print("Prusa PETG")
                     parameters["printer_type"] = "Exotic_Prusa"
+                elif re.search("iForge TPU", line):
+                    print("iForge TPU")
+                    parameters["printer_type"] = "Exotic_Prusa"
 
                 elif re.search("iForge PLA", line):
                     parameters["printer_type"] = "Prusa"
@@ -102,3 +105,6 @@ def run(fileName, short):
         error = True
 
     return parameters, error
+
+
+print(run("/Users/James/Developer/print-submission/TESTShape-Box_0.3mm_FLEX_IFPRUSA_iForge Prusa Standard_1h4m.gcode", "gorge"))
