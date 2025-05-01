@@ -8,7 +8,19 @@ import cryptography.fernet
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-import PySimpleGUI as psg
+
+from PyQt5.QtWidgets import QDialog, QLineEdit, QLabel, QVBoxLayout
+
+class PasswordPopup(QDialog):
+    def __init__(self, msg, parent = None):
+        super().__init__(parent)
+        self.setWindowTitle("Password")
+        self.setLayout(QVBoxLayout)
+        self.label = QLabel(msg, self)
+        self.password_input = QLineEdit(self)
+        self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
+
+        self.password = self.password_input.text().lower()
 
 class Hashbrown:
     def __enter__(self):
@@ -40,8 +52,9 @@ class Hashbrown:
         if password:
             pass
         else:
+            password_window = PasswordPopup("Enter Password")
             # no password supplied
-            password = psg.PopupGetText("Enter password", password_char="*", title="Password")
+            password = password_window.password
             # password = input("enter password: ")
 
         loop_lock = True
@@ -52,7 +65,8 @@ class Hashbrown:
                 loop_lock = False
             except cryptography.fernet.InvalidToken:
                 print("Incorrect password, try again")
-                password = psg.PopupGetText("Enter password", password_char="*", title="Password")
+                password_window = PasswordPopup("Enter Password")
+                password = password_window.password
 
     def generate_cryptor(self, password):
         self.kdf = PBKDF2HMAC(
@@ -122,8 +136,10 @@ class Hashbrown:
         if not pwd:
             loop_lock = True
             while loop_lock:
-                password1 = psg.PopupGetText("Enter new password", password_char="*", title="Password")
-                password2 = psg.PopupGetText("Confirm new password", password_char="*", title="Password")
+                password_window1 = PasswordPopup("Enter new Password")
+                password1 = password_window1.password
+                password_window2 = PasswordPopup("Confirm new Password")
+                password2 = password_window2.password
                 if password1 == password2:
                     print("Passwords match, ", end="")
                     password = password1
