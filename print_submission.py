@@ -20,42 +20,10 @@ import LDAP
 import pandas as pd
 import keyboard
 from qt_material import apply_stylesheet
+from PyQt5.QtGui import QFontDatabase
 
 QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)  # enable highdpi scaling
 QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)  # use highdpi icons
-
-
-# class test(QLabel):
-#     clicked = pyqtSignal(str)
-#     drooped = pyqtSignal(str)
-#
-#     def __init__(self, parent):
-#         super(test, self).__init__(parent)
-#         self.setAcceptDrops(True)
-#
-#     def dragEnterEvent(self, e):
-#         print(e)
-#
-#         if e.mimeData().hasText():
-#             e.accept()
-#         else:
-#             e.ignore()
-#
-#     def dropEvent(self, e):
-#         print(e.mimeData().text())
-#         self.drooped.emit(e.mimeData().text())
-#
-#     def mousePressEvent(self, event):
-#         self.state = "click"
-#
-#     def mouseReleaseEvent(self, event):
-#         if self.state == "click":
-#             QTimer.singleShot(QApplication.instance().doubleClickInterval(), self.performSingleClickAction)
-#
-#     def performSingleClickAction(self):
-#         if self.state == "click":
-#             self.clicked.emit("")
-#             print("EMIT")
 
 
 class Validator(QtGui.QValidator):
@@ -93,13 +61,16 @@ class Print_queue_app(QWidget):
 
     def Theme_Swap(self, event):
         print("clicked")
+
         if keyboard.read_key() == "shift":
             if self.style == 0:
                 apply_stylesheet(self, 'dark_red.xml')
+
                 self.style = 1
             else:
                 apply_stylesheet(self, 'light_red.xml', invert_secondary=True)
                 self.style = 0
+
 
     def startEverything(self):
         self.scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive',
@@ -117,6 +88,20 @@ class Print_queue_app(QWidget):
         self.biglogopath = get_path.go('resources/iForge_logo_no_background_small.png')
         self.littlelogopath = get_path.go('resources/printq50.png')
 
+        self.setStyleSheet("""
+            QCheckBox::indicator {
+                width: 15px;
+                height: 15px;
+            }
+            QCheckBox::indicator:unchecked {
+                border: 2px solid #ed2023;   /* red border when unchecked */
+                background-color: white;
+            }
+            QCheckBox::indicator:checked {
+                border: 2px solid #ed2023;
+                background-color: #ed2023;   /* fill when checked */
+            }
+        """)
 
 
         self.version_check()
@@ -150,33 +135,6 @@ class Print_queue_app(QWidget):
         self.logo.mousePressEvent = self.Theme_Swap
         self.style = 0
 
-
-        # I hate the way this looks -AJM
-        # SETTING DARK MODE
-        if self.Config["dev_options"]["DarkMode"] == 1:
-            palette = QPalette()
-            palette.setColor(QPalette.Window, QColor(69, 69, 69))
-            palette.setColor(QPalette.WindowText, Qt.white)
-            palette.setColor(QPalette.Base, QColor(25, 25, 25))
-            palette.setColor(QPalette.AlternateBase, QColor(69, 69, 69))
-            palette.setColor(QPalette.ToolTipBase, Qt.white)
-            palette.setColor(QPalette.ToolTipText, Qt.white)
-            palette.setColor(QPalette.Text, Qt.white)
-            palette.setColor(QPalette.Button, QColor(19, 19, 19))
-            palette.setColor(QPalette.ButtonText, Qt.white)
-            palette.setColor(QPalette.BrightText, Qt.red)
-            palette.setColor(QPalette.Link, QColor(42, 130, 218))
-            palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
-            palette.setColor(QPalette.HighlightedText, Qt.black)
-            self.setPalette(palette)
-            # Setting Colour Overrides!
-
-            self.stylesheet = """
-                QWidget{color: rgb(255,255,255);}
-                QPushButton{background-color: #4e4e4e;}
-            """
-            # Setting Pallete for Program
-            self.setStyleSheet(self.stylesheet)
 
         self.path_GCODE = ""
         self.short_GCODE = ""
@@ -596,7 +554,7 @@ class Print_queue_app(QWidget):
             self.status_label.setText(" ")
             self.short_GCODE = details["filename"]
             self.path_GCODE = details["path"]
-            time = re.findall('\d+', details["time_taken"])
+            time = re.findall(r'\d+', details["time_taken"])
             global hours
             hours = int(time[0])
             print(self.path_GCODE)
@@ -991,7 +949,8 @@ class Print_queue_app(QWidget):
             sheet.update_cell(rows, '9', finalstatus)
 
             log_sheet = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("Print Log")
-            eta = log_sheet.acell("S1").value.split('\n')[1]
+            # eta = log_sheet.acell("S1").value.split('\n')[1] #nice idea, never used
+            # eta_string = "\n Our best time estimate is:\n" + eta
 
             self.clearall()
             self.clearUI()
@@ -1014,7 +973,7 @@ class Print_queue_app(QWidget):
             else:
                 even_shorter = self.short_GCODE
             useful_string = "Uploaded " + even_shorter + " at " + time + "\nYou are number " + queue + " in the queue."
-            eta_string = "\n Our best time estimate is:\n" + eta
+
             self.status_label.setText(useful_string)
 
             status_string = useful_string

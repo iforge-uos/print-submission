@@ -105,6 +105,3 @@ def run(fileName, short):
         error = True
 
     return parameters, error
-
-
-print(run("/Users/James/Developer/print-submission/TESTShape-Box_0.3mm_FLEX_IFPRUSA_iForge Prusa Standard_1h4m.gcode", "gorge"))

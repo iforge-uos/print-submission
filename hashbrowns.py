@@ -8,9 +8,10 @@ import cryptography.fernet
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-import PySimpleGUI as psg
+from PyQt5.QtWidgets import QApplication, QInputDialog, QLineEdit
 
 class Hashbrown:
+    app = QApplication([])
     def __enter__(self):
         if self.build_mode:
             with open(get_path.go("secrets.json"), "w") as file:
@@ -41,8 +42,12 @@ class Hashbrown:
             pass
         else:
             # no password supplied
-            password = psg.PopupGetText("Enter password", password_char="*", title="Password")
-            # password = input("enter password: ")
+            password, ok = QInputDialog.getText(
+                None,
+                "Password",
+                "Enter password:",
+                QLineEdit.Password  # hides input with '*'
+            )
 
         loop_lock = True
         while loop_lock:
@@ -52,7 +57,15 @@ class Hashbrown:
                 loop_lock = False
             except cryptography.fernet.InvalidToken:
                 print("Incorrect password, try again")
-                password = psg.PopupGetText("Enter password", password_char="*", title="Password")
+                password, ok = QInputDialog.getText(
+                    None,
+                    "Password",
+                    "Enter password:",
+                    QLineEdit.Password  # hides input
+                )
+                if not ok:
+                    print("User cancelled password input")
+                    break  # exit the loop if cancelled
 
     def generate_cryptor(self, password):
         self.kdf = PBKDF2HMAC(
@@ -122,8 +135,18 @@ class Hashbrown:
         if not pwd:
             loop_lock = True
             while loop_lock:
-                password1 = psg.PopupGetText("Enter new password", password_char="*", title="Password")
-                password2 = psg.PopupGetText("Confirm new password", password_char="*", title="Password")
+                password1, ok = QInputDialog.getText(
+                    None,
+                    "Password",
+                    "Enter password:",
+                    QLineEdit.Password  # hides input
+                )
+                password2, ok = QInputDialog.getText(
+                    None,
+                    "Password",
+                    "Enter password:",
+                    QLineEdit.Password  # hides input
+                )
                 if password1 == password2:
                     print("Passwords match, ", end="")
                     password = password1
