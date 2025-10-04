@@ -816,7 +816,7 @@ class Print_queue_app(QWidget):
             if ok == False:
                 return "FALSE"
                 break
-            if text == "maker5pace":
+            if text == "mak3rspace":
                 # Ah yes lets store the password as plain text, solid idea....
                 # msg = QMessageBox()
                 # msg.setIcon(QMessageBox.Information)
