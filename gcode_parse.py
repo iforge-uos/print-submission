@@ -60,16 +60,19 @@ def run(fileName, short):
                 elif re.search("iForge TPU", line):
                     print("iForge TPU")
                     parameters["printer_type"] = "Exotic_Prusa"
-
                 elif re.search("iForge PLA", line):
-                    parameters["printer_type"] = "Prusa"
                     print("Prusa PLA")
+                    parameters["printer_type"] = "Exotic_Prusa"
+                elif re.search("iForge C1 PLA", line):
+                    print("Prusa PLA")
+                    parameters["printer_type"] = "Prusa"
+
 
             if not parameters["time_taken"] and re.search("(normal mode)", line):
 
                 times = {'d': 0, 'h': 0, 'm': 0, 's': 0}
                 for elem in times.keys():
-                    pattern = f"\d+(?={elem}\s)"
+                    pattern = rf"\d+(?={elem}\s)"
                     tmp = re.findall(pattern, line)
                     if tmp:
                         times[elem] = int(tmp[0])
@@ -77,13 +80,13 @@ def run(fileName, short):
                 time = f"{times['d'] * 24 + times['h']:02d}:{times['m']:02d}:{times['s']:02d}"  # Formatting to ensure two digits in minutes and seconds
                 parameters["time_taken"] = time
 
-            if len(parameters["filament_used"]) != 3 and re.search("(?<=; filament used \[)\w+(?=\])", line):
+            if len(parameters["filament_used"]) != 3 and re.search(r"(?<=; filament used \[)\w+(?=\])", line):
                 # some regex optimisation :)
 
                 # get mm/cm3/g string from line
-                key = re.findall("(?<=; filament used \[)\w+(?=\])", line)[0]
+                key = re.findall(r"(?<=; filament used \[)\w+(?=\])", line)[0]
                 # get value from line
-                parameters["filament_used"][key] = float(re.findall("(?<=\s=\s)\d+\.*\d*", line)[0])
+                parameters["filament_used"][key] = float(re.findall(r"(?<=\s=\s)\d+\.*\d*", line)[0])
 
                 # if re.search("mm", line):
                 #     print(12)

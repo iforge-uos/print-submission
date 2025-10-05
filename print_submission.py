@@ -85,8 +85,8 @@ class Print_queue_app(QWidget):
         # Set the window properties, size it will occupy, position on screen and
         # give it an icon
 
-        self.biglogopath = get_path.go('resources/iForge_logo_no_background_small.png')
-        self.littlelogopath = get_path.go('resources/printq50.png')
+        self.biglogopath = get_path.nuitka('resources/iForge_logo_no_background_small.png')
+        self.littlelogopath = get_path.nuitka('resources/printq50.png')
 
         self.setStyleSheet("""
             QCheckBox::indicator {
@@ -107,7 +107,7 @@ class Print_queue_app(QWidget):
         self.version_check()
 
         self.setWindowTitle("iForge 3D Print Submission")
-        self.setWindowIcon(QIcon(self.littlelogopath))
+        self.setWindowIcon(QIcon(str(self.littlelogopath)))
 
         screen = self.Config["app"].primaryScreen()
         size = screen.size()
@@ -126,7 +126,7 @@ class Print_queue_app(QWidget):
         # Set up iForge imgae as a pixmap
         self.logo = QLabel(self)
 
-        self.logo.setPixmap(QPixmap(self.biglogopath))
+        self.logo.setPixmap(QPixmap(str(self.biglogopath)))
         self.logo.setToolTip("Build " + str(self.Config["Version"]))
 
         self.logo.installEventFilter(self)

@@ -78,17 +78,17 @@ class Hashbrown:
         self.cryptor = Fernet(self.key)
 
     def load_encrypted(self):
-        with open(get_path.go("resources/secrets.json.enc"), "rb") as encrypted_file:
+        with open(get_path.nuitka("resources/secrets.json.enc"), "rb") as encrypted_file:
             data = encrypted_file.read()
         return data
 
     def write_encrypted(self):
-        with open(get_path.go("resources/secrets.json.enc"), "wb") as encrypted_file:
+        with open(get_path.nuitka("resources/secrets.json.enc"), "wb") as encrypted_file:
             encrypted_file.write(self.encrypted_data)
 
     def encrypt(self, data=None):
         if not data:
-            with open(get_path.go("secrets.json"), "rb") as decrypted_file:
+            with open(get_path.nuitka("secrets.json"), "rb") as decrypted_file:
                 data = decrypted_file.read()
                 try:
                     json.loads(data.decode("ascii"))

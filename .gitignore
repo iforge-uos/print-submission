@@ -7,5 +7,9 @@ secrets.json
 
 build/
 dist/
+main.dist/
+main.build/
+main.onefile-build/
+env/
 
 *.spec
