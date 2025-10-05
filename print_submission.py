@@ -689,33 +689,71 @@ class Print_queue_app(QWidget):
         global sheet
         try:
             sheet = self.client.open_by_url(self.Config["spreadsheet"]).worksheet("Print Log")
-            latest = int(sheet.acell("S2").value)
-            if latest > version:
-                print("oh dear ")
-                self.error_handling(2)
+            cell_read = sheet.acell("S2").value
+            if isinstance(cell_read, str):
+                # Attempt to treat as int first
+                try:
+                    version_cell = int(cell_read)
+                    # If successful, compare as integer
+                    if version_cell > version:
+                        self.error_handling(2)
+                        sys.exit(1)
+                except ValueError:
+                    # Not an int, treat as string
+                    closed = cell_read.lower()
+                    if closed == "closed":
+                        self.error_handling(7)
+                        sys.exit(1)
+                    else:
+                        self.error_handling(8)
+                        sys.exit(1)
+            elif isinstance(cell_read, int):
+                # Already an int
+                if cell_read > version:
+                    self.error_handling(2)
+                    sys.exit(1)
+            else:
+                # Anything else (None, float, etc.)
+                self.error_handling(8)
                 sys.exit(1)
+
         except Exception as e:
-            # raise e
+            print("Exception caught:", e)
             self.error_handling(6)
             sys.exit(1)
+
 
     # There was a rep who made me realise that this code may need some form of
     # competency check and/or warnings (Tylerproof).
     def error_handling(self, n):
         msg = QMessageBox()
-        msg.setWindowIcon(QIcon(self.littlelogopath))
-        if n == 2 or 6:
-            msg.setIcon(QMessageBox.Critical)
-        else:
-            msg.setIcon(QMessageBox.Information)
-
+        msg.setWindowIcon(QIcon(str(self.littlelogopath)))
+        # print(n)
+        # if n == (2 or 6):
+        #     print("crit")
+        #     msg.setIcon(QMessageBox.Critical)
+        # else:
+        #     msg.setIcon(QMessageBox.Information)
+        critical_codes = {2, 6, 7}  # these codes use Critical icon
+        warning_codes = {1, 8}  # these codes use Warning icon
+        info_codes = {0, 3, 4, 5}  # these codes use Information icon
         text = ["Please fill in all boxes",
                 "It looks like there was a network error.\nAre you on the university network?",
                 "This version of the program is critically out of date! \n\n Please download the latest version.",
                 "The rep needs to match their name to the autofill.",
                 "I'm sorry Dave, I'm afraid I can't do that",
                 "The personal identifier you entered doesn't appear to be valid",
-                "Cannot connect to internet, please try again with a valid connection"]
+                "Cannot connect to internet, please try again with a valid connection",
+                "The queue has been marked as closed",
+                "Invalid version number in queue spreadsheet"]
+
+        if n in info_codes:
+            msg.setIcon(QMessageBox.Information)
+        elif n in warning_codes:
+            msg.setIcon(QMessageBox.Warning)
+        else:
+            msg.setIcon(QMessageBox.Critical)
+
         msg.setText(text[n])
         # This is of course a reference to the film se7en
         msg.setWindowTitle("WHATS IN THE BOX!")

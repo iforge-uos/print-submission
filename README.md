@@ -43,8 +43,8 @@ When up to date and ready run main.py.
   
 *Contributors:*
 
-Alistair Mitchell - Initial creation of program (2018) and writer of base code to achieve all functionality up to 2021 with majority still valid in 2022.  
+Alistair Mitchell - Initial creation of program (2018) and writer of base code to achieve all functionality up to 2021 with majority still valid in 2022. Long term support continuing to present (2025)
 Sam Rhodes - Minor visual changes (2020)  
 Harry Merckel & Dom Rugg-Gunn - Contribution of better coding practice and rewrite of some modules to use better techniques. Adjusted code to interface better with kiosk system (2022)  
 Sam Piper & CT - Minor updates and changes as well as stewardship (2023)  
-Eromu Ehwerhemepha - Present individual handling development  
+Eromu Ehwerhemepha - Contributor
