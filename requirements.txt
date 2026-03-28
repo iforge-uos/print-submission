@@ -1,6 +1,6 @@
 ldap3==2.9.1
 pyinstaller==6.16.0
-cryptography==46.0.2
+cryptography==46.0.6
 PyQt5==5.15.11
 gspread==5.0.0
 oauth2client==4.1.3
